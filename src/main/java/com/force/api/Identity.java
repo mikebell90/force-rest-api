@@ -212,5 +212,21 @@ public class Identity {
 		this.lastModifiedDate = lastModifiedDate;
 	}
 
+	@Override
+	public String toString() {
+		return "Identity [id=" + this.id + ", assertedUser="
+				+ this.assertedUser + ", userId=" + this.userId
+				+ ", organizationId=" + this.organizationId + ", username="
+				+ this.username + ", nickName=" + this.nickName
+				+ ", displayName=" + this.displayName + ", email=" + this.email
+				+ ", firstName=" + this.firstName + ", lastName="
+				+ this.lastName + ", status=" + this.status + ", photos="
+				+ this.photos + ", urls=" + this.urls + ", isActive="
+				+ this.isActive + ", userType=" + this.userType + ", language="
+				+ this.language + ", locale=" + this.locale + ", utcOffset="
+				+ this.utcOffset + ", lastModifiedDate="
+				+ this.lastModifiedDate + "]";
+	}
+
 	
 }

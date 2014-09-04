@@ -88,10 +88,22 @@ public class ForceApi {
 						.method("GET")
 						.header("Accept", "application/json")
 					).getStream(),Map.class);
+			return getIdentity((String) resp.get("identity"));
+		} catch (JsonParseException e) {
+			throw new SFApiException(e);
+		} catch (JsonMappingException e) {
+			throw new SFApiException(e);
+		} catch (IOException e) {
+			throw new SFApiException(e);
+		}
 
+	}
+
+	public Identity getIdentity(String identityURL) {
+		try {
 			return jsonMapper.readValue(
 					apiRequest(new HttpRequest()
-						.url((String) resp.get("identity"))
+						.url(identityURL)
 						.method("GET")
 						.header("Accept", "application/json")
 					).getStream(), Identity.class);
@@ -104,7 +116,6 @@ public class ForceApi {
 		}
 
 	}
-
 
 	public ResourceRepresentation getSObject(String type, String id) throws SFApiException {
 		// Should we return null or throw an exception if the record is not found?
