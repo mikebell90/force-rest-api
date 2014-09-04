@@ -11,7 +11,7 @@ import com.force.api.exceptions.SFApiException;
 public class HttpRequest {
 
 	static public HttpRequest formPost() { 
-			return new HttpRequest()
+			return new HttpRequest(ResponseFormat.STREAM)
 				.method("POST")
 				.header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
 	}
@@ -32,7 +32,8 @@ public class HttpRequest {
 
 	private String authorization;
 	
-	public HttpRequest() {
+	public HttpRequest(ResponseFormat format) {
+		this.responseFormat=format;
 	}
 
 	public List<Header> getHeaders() {

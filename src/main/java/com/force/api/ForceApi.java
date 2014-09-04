@@ -8,6 +8,7 @@ import com.force.api.exceptions.SObjectException;
 import com.force.api.http.Http;
 import com.force.api.http.HttpRequest;
 import com.force.api.http.HttpResponse;
+import com.force.api.http.HttpRequest.ResponseFormat;
 
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonNode;
@@ -21,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -79,16 +81,17 @@ public class ForceApi {
 
 
 	public Identity getIdentity() {
-		try {
-
+		try (InputStream is=
+				apiRequest(new HttpRequest(ResponseFormat.STREAM)
+				.url(uriBase())
+				.method("GET")
+				.header("Accept", "application/json")
+				)
+				.getStream()) {
 			@SuppressWarnings("unchecked")
 			Map<String,Object> resp = jsonMapper.readValue(
-					apiRequest(new HttpRequest()
-						.url(uriBase())
-						.method("GET")
-						.header("Accept", "application/json")
-					).getStream(),Map.class);
-			System.out.println("ID="+((String) resp.get("identity")));
+					is,Map.class);
+			log.debug("ID="+((String) resp.get("identity")));
 			return getIdentity((String) resp.get("identity"));
 		} catch (JsonParseException e) {
 			throw new SFApiException(e);
@@ -96,18 +99,18 @@ public class ForceApi {
 			throw new SFApiException(e);
 		} catch (IOException e) {
 			throw new SFApiException(e);
-		}
-
+		} 
 	}
 
 	public Identity getIdentity(String identityURL) {
-		try {
+		try (InputStream is=
+				apiRequest(new HttpRequest(ResponseFormat.STREAM)
+				.url(identityURL)
+				.method("GET")
+				.header("Accept", "application/json")
+			).getStream() )  {
 			return jsonMapper.readValue(
-					apiRequest(new HttpRequest()
-						.url(identityURL)
-						.method("GET")
-						.header("Accept", "application/json")
-					).getStream(), Identity.class);
+					is, Identity.class);
 		} catch (JsonParseException e) {
 			throw new SFApiException(e);
 		} catch (JsonMappingException e) {
@@ -121,26 +124,26 @@ public class ForceApi {
 	public ResourceRepresentation getSObject(String type, String id) throws SFApiException {
 		// Should we return null or throw an exception if the record is not found?
 		// Right now will just throw crazy runtimeexception with no explanation
-		return new ResourceRepresentation(apiRequest(new HttpRequest()
+		return new ResourceRepresentation(apiRequest(new HttpRequest(ResponseFormat.STREAM)
 					.url(uriBase()+"/sobjects/"+type+"/"+id)
 					.method("GET")
 					.header("Accept", "application/json")));
 	}
 
 	public String createSObject(String type, Object sObject) {
-		try {
-			// We're trying to keep Http classes clean with no reference to JSON/Jackson
-			// Therefore, we serialize to bytes before we pass object to HttpRequest().
-			// But it would be nice to have a streaming implementation. We can do that
-			// by using ObjectMapper.writeValue() passing in output stream, but then we have
-			// polluted the Http layer.
-			CreateResponse result = jsonMapper.readValue(apiRequest(new HttpRequest()
+		try (InputStream is=apiRequest(new HttpRequest(ResponseFormat.STREAM)
 					.url(uriBase()+"/sobjects/"+type)
 					.method("POST")
 					.header("Accept", "application/json")
 					.header("Content-Type", "application/json")
 					.expectsCode(201)
-					.content(jsonMapper.writeValueAsBytes(sObject))).getStream(),CreateResponse.class);
+					.content(jsonMapper.writeValueAsBytes(sObject))).getStream()){
+			// We're trying to keep Http classes clean with no reference to JSON/Jackson
+			// Therefore, we serialize to bytes before we pass object to HttpRequest().
+			// But it would be nice to have a streaming implementation. We can do that
+			// by using ObjectMapper.writeValue() passing in output stream, but then we have
+			// polluted the Http layer.
+			CreateResponse result = jsonMapper.readValue(is,CreateResponse.class);
 
 			if (result.isSuccess()) {
 				return (result.getId());
@@ -157,16 +160,15 @@ public class ForceApi {
 	}
 
 	public void updateSObject(String type, String id, Object sObject) {
-		try {
-			// See createSObject for note on streaming ambition
-			apiRequest(new HttpRequest()
+		try (InputStream is=apiRequest(new HttpRequest(ResponseFormat.STREAM)
 				.url(uriBase()+"/sobjects/"+type+"/"+id+"?_HttpMethod=PATCH")
 				.method("POST")
 				.header("Accept", "application/json")
 				.header("Content-Type", "application/json")
 				.expectsCode(204)
 				.content(jsonMapper.writeValueAsBytes(sObject))
-			);
+			).getStream()){
+			// See createSObject for note on streaming ambition
 		} catch (JsonGenerationException e) {
 			throw new SFApiException(e);
 		} catch (JsonMappingException e) {
@@ -177,24 +179,30 @@ public class ForceApi {
 	}
 
 	public void deleteSObject(String type, String id) {
-		apiRequest(new HttpRequest()
+		try (InputStream is=apiRequest(new HttpRequest(ResponseFormat.STREAM)
 			.url(uriBase()+"/sobjects/"+type+"/"+id)
-			.method("DELETE")
-		);
+			.method("DELETE")).getStream()
+		) {
+			// whee
+		} catch (IOException e) {
+			throw new SFApiException(e);
+		}
 	}
 
 	public CreateOrUpdateResult createOrUpdateSObject(String type, String externalIdField, String externalIdValue, Object sObject) {
+		InputStream is=null;
 		try {
 			// See createSObject for note on streaming ambition
 			HttpResponse res =
-				apiRequest(new HttpRequest()
+				apiRequest(new HttpRequest(ResponseFormat.STREAM)
 					.url(uriBase()+"/sobjects/"+type+"/"+externalIdField+"/"+URLEncoder.encode(externalIdValue,"UTF-8")+"?_HttpMethod=PATCH")
 					.method("POST")
 					.header("Accept", "application/json")
 					.header("Content-Type", "application/json")
 					.content(jsonMapper.writeValueAsBytes(sObject))
-				);
-			if(res.getResponseCode()==201) {
+				);			
+			is=res.getStream();
+			if(res.getResponseCode()==201) {				
 				return CreateOrUpdateResult.CREATED;
 			} else if(res.getResponseCode()==204) {
 				return CreateOrUpdateResult.UPDATED;
@@ -203,15 +211,22 @@ public class ForceApi {
 //				System.out.println("Code: "+res.getResponseCode());
 	//			System.out.println("Message: "+res.getString());
 		//		throw new RuntimeException();
-			}
-
+			} 
 		} catch (JsonGenerationException e) {
 			throw new SFApiException(e);
 		} catch (JsonMappingException e) {
 			throw new SFApiException(e);
 		} catch (IOException e) {
 			throw new SFApiException(e);
+		} finally {
+			if (is !=null)
+				try {
+					is.close();
+				} catch (IOException e) {
+					throw new SFApiException(e);
+				}
 		}
+
 	}
 
 	public <T> QueryResult<T> query(String query, Class<T> clazz) {
@@ -237,18 +252,17 @@ public class ForceApi {
     }
 
     private <T> QueryResult<T> queryAny(String queryUrl, Class<T> clazz) {
-        try {
-            HttpResponse res = apiRequest(new HttpRequest()
+        try (InputStream is= apiRequest(new HttpRequest(ResponseFormat.STREAM)
                     .url(queryUrl)
                     .method("GET")
                     .header("Accept", "application/json")
-                    .expectsCode(200));
-
+                    .expectsCode(200)).getStream()){
+            
             // We build the result manually, because we can't pass the type information easily into
             // the JSON parser mechanism.
 
             QueryResult<T> result = new QueryResult<T>();
-            JsonNode root = jsonMapper.readTree(res.getStream());
+            JsonNode root = jsonMapper.readTree(is);
             result.setDone(root.get("done").getBooleanValue());
             result.setTotalSize(root.get("totalSize").getIntValue());
             if (root.get("nextRecordsUrl") != null) {
@@ -270,11 +284,11 @@ public class ForceApi {
     }
 
     public DescribeGlobal describeGlobal() {
-		try {
-			return jsonMapper.readValue(apiRequest(new HttpRequest()
+		try (InputStream is=apiRequest(new HttpRequest(ResponseFormat.STREAM)
 					.url(uriBase()+"/sobjects/")
 					.method("GET")
-					.header("Accept", "application/json")).getStream(),DescribeGlobal.class);
+					.header("Accept", "application/json")).getStream()){
+			return jsonMapper.readValue(is,DescribeGlobal.class);
 		} catch (JsonParseException e) {
 			throw new SFApiException(e);
 		} catch (JsonMappingException e) {
@@ -287,14 +301,13 @@ public class ForceApi {
 	}
 
     public <T> DiscoverSObject<T> discoverSObject(String sobject, Class<T> clazz) {
-        try {
-            HttpResponse res = apiRequest(new HttpRequest()
+        try (InputStream is=apiRequest(new HttpRequest(ResponseFormat.STREAM)
                     .url(uriBase() + "/sobjects/" + sobject)
                     .method("GET")
                     .header("Accept", "application/json")
-                    .expectsCode(200));
+                    .expectsCode(200)).getStream()){
 
-            final JsonNode root = jsonMapper.readTree(res.getStream());
+            final JsonNode root = jsonMapper.readTree(is);
             final DescribeSObjectBasic describeSObjectBasic = jsonMapper.readValue(root.get("objectDescribe"), DescribeSObjectBasic.class);
             final List<T> recentItems = new ArrayList<T>();
             for(JsonNode item : root.get("recentItems")) {
@@ -311,11 +324,11 @@ public class ForceApi {
     }
 
 	public DescribeSObject describeSObject(String sobject) {
-		try {
-			return jsonMapper.readValue(apiRequest(new HttpRequest()
+		try (InputStream is=apiRequest(new HttpRequest(ResponseFormat.STREAM)
 					.url(uriBase()+"/sobjects/"+sobject+"/describe")
 					.method("GET")
-					.header("Accept", "application/json")).getStream(),DescribeSObject.class);
+					.header("Accept", "application/json")).getStream()) {
+			return jsonMapper.readValue(is,DescribeSObject.class);
 		} catch (JsonParseException e) {
 			throw new SFApiException(e);
 		} catch (JsonMappingException e) {

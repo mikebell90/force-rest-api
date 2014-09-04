@@ -5,6 +5,7 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -31,6 +32,8 @@ public class Http {
 	}
 	
 	public static final HttpResponse send(HttpRequest req) {
+		OutputStream os=null;
+		InputStream is=null;
 		try {
 			HttpURLConnection conn = (HttpURLConnection) new URL(req.getUrl()).openConnection();
 			conn.setInstanceFollowRedirects(true);
@@ -43,46 +46,75 @@ public class Http {
 			if(req.getAuthorization()!=null) {
 				conn.addRequestProperty("Authorization", req.getAuthorization());
 			}
-			if (req.getContentBytes() != null) {
-				conn.setDoOutput(true);
-				BufferedOutputStream out = new BufferedOutputStream(conn.getOutputStream());
-				out.write(req.getContentBytes());
-				out.flush();
+			if (req.getContentBytes() != null) {				
+				conn.setDoOutput(true);				
+				os = new BufferedOutputStream(conn.getOutputStream());
+				os.write(req.getContentBytes());
+				os.flush();
 			} else if (req.getContentStream() != null) {
 				conn.setDoOutput(true);
 				final byte[] buf = new byte[2000];
-				BufferedOutputStream out = new BufferedOutputStream(conn.getOutputStream());
+				os = new BufferedOutputStream(conn.getOutputStream());
 				int n;
 				while ((n = req.getContentStream().read(buf)) >= 0) {
-					out.write(buf, 0, n);
+					os.write(buf, 0, n);
 				}
-				out.flush();
-			}
+				os.flush();
+			}			
 			int code = conn.getResponseCode();
 			if (code < 300 && code >= 200) {
+				is = conn.getInputStream();
 				switch (req.getResponseFormat()) {
-				case BYTE:
-					return new HttpResponse().setByte(readResponse(conn.getInputStream()))
+				
+				case BYTE: {					
+					return new HttpResponse().setByte(readResponse(is))
 							.setResponseCode(code);
+				}
 				case STRING:
 					return new HttpResponse().setString(
-							new String(readResponse(conn.getInputStream()), "UTF-8")).setResponseCode(
+							new String(readResponse(is), "UTF-8")).setResponseCode(
 							code);
-				default:
-					return new HttpResponse().setStream(conn.getInputStream()).setResponseCode(code);
+				default: {
+						HttpResponse r= new HttpResponse().setStream(is).setResponseCode(code);
+						is=null; 
+						return r;
 				}
-			} else {
+					
+				}
+			} else {				
 				log.error("Bad response code: " + code + " on request:\n" + req);
+				is=conn.getErrorStream();
 				HttpResponse r = new HttpResponse().setString(
-						new String(readResponse(conn.getErrorStream()), "UTF-8")).setResponseCode(code);
+						new String(readResponse(is), "UTF-8")).setResponseCode(code);
 				return r;
 			}
 		} catch (MalformedURLException e) {
 			throw new SFApiException(e);
 		} catch (IOException e) {
 			throw new SFApiException(e);
+		} finally {
+			close(os);
+			close(is);			
 		}
 
+	}
+
+	private static void close(InputStream is) {
+		try { 
+			if (is!=null) is.close();
+		} catch (IOException io) {
+			//
+		}
+		
+	}
+
+	private static void close(OutputStream os) {
+		try {
+			if (os !=null) os.close();
+		} catch (IOException e) {
+			//
+		}
+		
 	}
 
 

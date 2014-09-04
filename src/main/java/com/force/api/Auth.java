@@ -28,17 +28,16 @@ public class Auth {
 		if(c.getClientSecret()==null) throw new IllegalStateException("clientSecret cannot be null");
 		if(c.getUsername()==null) throw new IllegalStateException("username cannot be null");
 		if(c.getPassword()==null) throw new IllegalStateException("password cannot be null");
-		try {
-			@SuppressWarnings("unchecked")
-			Map<String,Object> resp = jsonMapper.readValue(
-					Http.send(HttpRequest.formPost()
+		try (InputStream is=Http.send(HttpRequest.formPost()
 						.url(c.getLoginEndpoint()+"/services/oauth2/token")
 						.param("grant_type","password")
 						.param("client_id",c.getClientId())
 						.param("client_secret", c.getClientSecret())
 						.param("username",c.getUsername())
 						.param("password",c.getPassword())
-					).getStream(),Map.class);
+					).getStream()){
+			@SuppressWarnings("unchecked")
+			Map<String,Object> resp = jsonMapper.readValue(is,Map.class);
 			return new ApiSession((String)resp.get("access_token"),(String)resp.get("instance_url"));
 			
 		} catch (JsonParseException e) {
@@ -128,9 +127,7 @@ public class Auth {
 		if(res.apiConfig.getRedirectURI()==null) throw new IllegalStateException("redirectURI cannot be null");
 		if(res.code==null) throw new IllegalStateException("code cannot be null");
 		// TODO: throw a (runtime) exception with detailed info if auth failed
-		try {
-			Map<?,?> resp = jsonMapper.readValue(
-					Http.send(HttpRequest.formPost()
+		try (InputStream is=Http.send(HttpRequest.formPost()
 						.url(res.apiConfig.getLoginEndpoint()+"/services/oauth2/token")
 						.header("Accept","application/json")
 						.param("grant_type","authorization_code")
@@ -138,7 +135,9 @@ public class Auth {
 						.param("client_secret", res.apiConfig.getClientSecret())
 						.param("redirect_uri",res.apiConfig.getRedirectURI())
 						.preEncodedParam("code",res.code)
-					).getStream(),Map.class);
+					).getStream()){
+			Map<?,?> resp = jsonMapper.readValue(
+					is,Map.class);
 
 			return new ApiSession()
 					.setRefreshToken((String)resp.get("refresh_token"))
@@ -158,16 +157,15 @@ public class Auth {
 		if(config.getClientId()==null) throw new IllegalStateException("clientId cannot be null");
 		if(config.getClientSecret()==null) throw new IllegalStateException("clientSecret cannot be null");
 		// TODO: throw a (runtime) exception with detailed info if auth failed
-		try {
-			Map<?,?> resp = jsonMapper.readValue(
-					Http.send(HttpRequest.formPost()
+		try (InputStream is=Http.send(HttpRequest.formPost()
 						.url(config.getLoginEndpoint()+"/services/oauth2/token")
 						.header("Accept","application/json")
 						.param("grant_type","refresh_token")
 						.param("client_id",config.getClientId())
 						.param("client_secret", config.getClientSecret())
 						.param("refresh_token", refreshToken)
-					).getStream(),Map.class);
+					).getStream()){
+			Map<?,?> resp = jsonMapper.readValue(is,Map.class);
 
 			return new ApiSession()
 					.setAccessToken((String)resp.get("access_token"))
@@ -189,11 +187,12 @@ public class Auth {
 	 * @param token either an access token or a refresh token
 	 */
 	static public void revokeToken(ApiConfig config, String token) {
-		try {
-			Http.send(HttpRequest.formPost()
+		
+		try (InputStream is=Http.send(HttpRequest.formPost()
 				.header("Accept","*/*")
 				.url(config.getLoginEndpoint()+"/services/oauth2/revoke")
-				.param("token", token));
+				.param("token", token)).getStream()) {
+		// the above does what it needs to
 		} catch(Throwable t) {
 			// Looks like revoke endpoint closes stream when trying to revoke
 			// an already revoked token. It doesn't return an error code. So

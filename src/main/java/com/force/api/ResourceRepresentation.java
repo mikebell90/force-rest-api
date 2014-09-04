@@ -1,6 +1,7 @@
 package com.force.api;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -29,8 +30,8 @@ public class ResourceRepresentation {
 	}
 
 	public <T> T as(Class<T> clazz) {
-		try {
-			return (T) jsonMapper.readValue(response.getStream(), clazz);
+		try (InputStream is=response.getStream()){
+			return (T) jsonMapper.readValue(is, clazz);
 		} catch (JsonParseException e) {
 			throw new SFApiException(e);
 		} catch (JsonMappingException e) {
@@ -41,8 +42,8 @@ public class ResourceRepresentation {
 	}
 	
 	public Map<?,?> asMap() {
-		try {
-			return jsonMapper.readValue(response.getStream(), Map.class);
+		try (InputStream is=response.getStream()){
+			return jsonMapper.readValue(is, Map.class);
 		} catch (JsonParseException e) {
 			throw new SFApiException(e);
 		} catch (JsonMappingException e) {
