@@ -337,7 +337,7 @@ public class ForceApi {
 			// Perform one attempt to auto renew session if possible
 			if(autoRenew) {
 				log.debug("Session expired. Refreshing session...");
-				if (this.observer !=null) this.observer.tokenAboutToChange();
+				if (this.observer !=null) this.observer.tokenNeedsRenewal(getSession().getAccessToken(), getSession().getRefreshToken());
 				if(getSession().getRefreshToken()!=null) {
 					try {
 						setSession(Auth.refreshOauthTokenFlow(config, getSession().getRefreshToken()));

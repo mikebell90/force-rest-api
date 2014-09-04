@@ -38,6 +38,13 @@ public class ApiSession implements java.io.Serializable {
 		refreshToken = value;
 		return this;
 	}
+
+	@Override
+	public String toString() {
+		return "ApiSession [accessToken=" + this.accessToken + ", apiEndpoint="
+				+ this.apiEndpoint + ", refreshToken=" + this.refreshToken
+				+ "]";
+	}
 	
 
 }
