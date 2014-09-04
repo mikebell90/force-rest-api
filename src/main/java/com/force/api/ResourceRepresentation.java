@@ -31,11 +31,11 @@ public class ResourceRepresentation {
 		try {
 			return (T) jsonMapper.readValue(response.getStream(), clazz);
 		} catch (JsonParseException e) {
-			throw new ResourceException(e);
+			throw new SFApiException(e);
 		} catch (JsonMappingException e) {
-			throw new ResourceException(e);
+			throw new SFApiException(e);
 		} catch (IOException e) {
-			throw new ResourceException(e);
+			throw new SFApiException(e);
 		}
 	}
 	
@@ -43,11 +43,11 @@ public class ResourceRepresentation {
 		try {
 			return jsonMapper.readValue(response.getStream(), Map.class);
 		} catch (JsonParseException e) {
-			throw new ResourceException(e);
+			throw new SFApiException(e);
 		} catch (JsonMappingException e) {
-			throw new ResourceException(e);
+			throw new SFApiException(e);
 		} catch (IOException e) {
-			throw new ResourceException(e);
+			throw new SFApiException(e);
 		}
 	}
 
@@ -55,11 +55,11 @@ public class ResourceRepresentation {
 		try {
 			return jsonMapper.readValue(response.getStream(), List.class);
 		} catch (JsonParseException e) {
-			throw new ResourceException(e);
+			throw new SFApiException(e);
 		} catch (JsonMappingException e) {
-			throw new ResourceException(e);
+			throw new SFApiException(e);
 		} catch (IOException e) {
-			throw new ResourceException(e);
+			throw new SFApiException(e);
 		}
 	}
 

@@ -12,6 +12,8 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -38,7 +40,7 @@ import java.util.Map.Entry;
  *
  */
 public class ForceApi {
-
+	private static final Logger log = LoggerFactory.getLogger(ForceApi.class);
 	private static final ObjectMapper jsonMapper;
 
 	static {
@@ -88,17 +90,17 @@ public class ForceApi {
 						.header("Accept", "application/json")
 					).getStream(), Identity.class);
 		} catch (JsonParseException e) {
-			throw new RuntimeException(e);
+			throw new SFApiException(e);
 		} catch (JsonMappingException e) {
-			throw new RuntimeException(e);
+			throw new SFApiException(e);
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new SFApiException(e);
 		}
 
 	}
 
 
-	public ResourceRepresentation getSObject(String type, String id) throws ResourceException {
+	public ResourceRepresentation getSObject(String type, String id) throws SFApiException {
 		// Should we return null or throw an exception if the record is not found?
 		// Right now will just throw crazy runtimeexception with no explanation
 		return new ResourceRepresentation(apiRequest(new HttpRequest()
@@ -128,11 +130,11 @@ public class ForceApi {
 				throw new SObjectException(result.getErrors());
 			}
 		} catch (JsonGenerationException e) {
-			throw new ResourceException(e);
+			throw new SFApiException(e);
 		} catch (JsonMappingException e) {
-			throw new ResourceException(e);
+			throw new SFApiException(e);
 		} catch (IOException e) {
-			throw new ResourceException(e);
+			throw new SFApiException(e);
 		}
 	}
 
@@ -148,11 +150,11 @@ public class ForceApi {
 				.content(jsonMapper.writeValueAsBytes(sObject))
 			);
 		} catch (JsonGenerationException e) {
-			throw new ResourceException(e);
+			throw new SFApiException(e);
 		} catch (JsonMappingException e) {
-			throw new ResourceException(e);
+			throw new SFApiException(e);
 		} catch (IOException e) {
-			throw new ResourceException(e);
+			throw new SFApiException(e);
 		}
 	}
 
@@ -179,17 +181,18 @@ public class ForceApi {
 			} else if(res.getResponseCode()==204) {
 				return CreateOrUpdateResult.UPDATED;
 			} else {
-				System.out.println("Code: "+res.getResponseCode());
-				System.out.println("Message: "+res.getString());
-				throw new RuntimeException();
+				throw new ApiException(res.getResponseCode(), res.getString());
+//				System.out.println("Code: "+res.getResponseCode());
+	//			System.out.println("Message: "+res.getString());
+		//		throw new RuntimeException();
 			}
 
 		} catch (JsonGenerationException e) {
-			throw new ResourceException(e);
+			throw new SFApiException(e);
 		} catch (JsonMappingException e) {
-			throw new ResourceException(e);
+			throw new SFApiException(e);
 		} catch (IOException e) {
-			throw new ResourceException(e);
+			throw new SFApiException(e);
 		}
 	}
 
@@ -197,7 +200,7 @@ public class ForceApi {
         try {
             return queryAny(uriBase() + "/query/?q=" + URLEncoder.encode(query, "UTF-8"), clazz);
         } catch (UnsupportedEncodingException e) {
-            throw new ResourceException(e);
+            throw new SFApiException(e);
         }
     }
 
@@ -240,11 +243,11 @@ public class ForceApi {
             result.setRecords(records);
             return result;
         } catch (JsonParseException e) {
-            throw new ResourceException(e);
+            throw new SFApiException(e);
         } catch (JsonMappingException e) {
-            throw new ResourceException(e);
+            throw new SFApiException(e);
         } catch (IOException e) {
-            throw new ResourceException(e);
+            throw new SFApiException(e);
         }
     }
 
@@ -255,13 +258,13 @@ public class ForceApi {
 					.method("GET")
 					.header("Accept", "application/json")).getStream(),DescribeGlobal.class);
 		} catch (JsonParseException e) {
-			throw new ResourceException(e);
+			throw new SFApiException(e);
 		} catch (JsonMappingException e) {
-			throw new ResourceException(e);
+			throw new SFApiException(e);
 		} catch (UnsupportedEncodingException e) {
-			throw new ResourceException(e);
+			throw new SFApiException(e);
 		} catch (IOException e) {
-			throw new ResourceException(e);
+			throw new SFApiException(e);
 		}
 	}
 
@@ -281,11 +284,11 @@ public class ForceApi {
             }
             return new DiscoverSObject<T>(describeSObjectBasic, recentItems);
         } catch (JsonParseException e) {
-            throw new ResourceException(e);
+            throw new SFApiException(e);
         } catch (JsonMappingException e) {
-            throw new ResourceException(e);
+            throw new SFApiException(e);
         } catch (IOException e) {
-            throw new ResourceException(e);
+            throw new SFApiException(e);
         }
     }
 
@@ -296,13 +299,13 @@ public class ForceApi {
 					.method("GET")
 					.header("Accept", "application/json")).getStream(),DescribeSObject.class);
 		} catch (JsonParseException e) {
-			throw new ResourceException(e);
+			throw new SFApiException(e);
 		} catch (JsonMappingException e) {
-			throw new ResourceException(e);
+			throw new SFApiException(e);
 		} catch (UnsupportedEncodingException e) {
-			throw new ResourceException(e);
+			throw new SFApiException(e);
 		} catch (IOException e) {
-			throw new ResourceException(e);
+			throw new SFApiException(e);
 		}
 	}
 	
@@ -316,7 +319,7 @@ public class ForceApi {
 		if(res.getResponseCode()==401) {
 			// Perform one attempt to auto renew session if possible
 			if(autoRenew) {
-				System.out.println("Session expired. Refreshing session...");
+				log.debug("Session expired. Refreshing session...");
 				if(session.getRefreshToken()!=null) {
 					session = Auth.refreshOauthTokenFlow(config, session.getRefreshToken());
 				} else {
@@ -324,16 +327,20 @@ public class ForceApi {
 				}
 				req.setAuthorization("OAuth "+session.getAccessToken());
 				res = Http.send(req);
+				if (res.getResponseCode()==401) throw new RefreshFailedApiException(401,"Tried to refresh but failed.");
+			} else {
+				throw new AuthenticationFailedException(401,"No refresh token, and 401 found");
 			}
+			
 		}
 		if(res.getResponseCode()>299) {
 			if(res.getResponseCode()==401) {
-				throw new ApiTokenException(res.getString());
+				throw new AuthenticationFailedException(401,res.getString());
 			} else {
 				throw new ApiException(res.getResponseCode(), res.getString());
 			}
 		} else if(req.getExpectedCode()!=-1 && res.getResponseCode()!=req.getExpectedCode()) {
-			throw new RuntimeException("Unexpected response from Force API. Got response code "+res.getResponseCode()+
+			throw new ApiException("Unexpected response from Force API. Got response code "+res.getResponseCode()+
 					". Was expecing "+req.getExpectedCode());
 		} else {
 			return res;

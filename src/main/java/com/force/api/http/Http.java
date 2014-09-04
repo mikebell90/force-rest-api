@@ -9,9 +9,14 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.force.api.SFApiException;
+
 
 public class Http {
-	
+	private final static Logger log = LoggerFactory.getLogger(Http.class);
 	static final byte[] readResponse(InputStream stream) throws IOException {
 		BufferedInputStream bin = new BufferedInputStream(stream);
 		ByteArrayOutputStream bout = new ByteArrayOutputStream();
@@ -63,15 +68,15 @@ public class Http {
 					return new HttpResponse().setStream(conn.getInputStream()).setResponseCode(code);
 				}
 			} else {
-				System.out.println("Bad response code: " + code + " on request:\n" + req);
+				log.error("Bad response code: " + code + " on request:\n" + req);
 				HttpResponse r = new HttpResponse().setString(
 						new String(readResponse(conn.getErrorStream()), "UTF-8")).setResponseCode(code);
 				return r;
 			}
 		} catch (MalformedURLException e) {
-			throw new RuntimeException(e);
+			throw new SFApiException(e);
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new SFApiException(e);
 		}
 
 	}

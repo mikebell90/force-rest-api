@@ -40,11 +40,11 @@ public class Auth {
 			return new ApiSession((String)resp.get("access_token"),(String)resp.get("instance_url"));
 			
 		} catch (JsonParseException e) {
-			throw new RuntimeException(e);
+			throw new SFApiException(e);
 		} catch (JsonMappingException e) {
-			throw new RuntimeException(e);
+			throw new SFApiException(e);
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new SFApiException(e);
 		}
 	}
 
@@ -94,11 +94,11 @@ public class Auth {
 			return new ApiSession(accessToken, apiEndpoint);
 			
 			} catch (MalformedURLException e) {
-				throw new RuntimeException(e);
+				throw new SFApiException(e);
 			} catch (UnsupportedEncodingException e) {
-				throw new RuntimeException(e);
+				throw new SFApiException(e);
 			} catch (IOException e) {
-				throw new RuntimeException(e);
+				throw new SFApiException(e);
 			}
 	}
 
@@ -116,7 +116,7 @@ public class Auth {
 					(req.immediate ? "&immediate=true" : "") +
 					(req.display!=null ? "&display="+req.display : "");
 		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
+			throw new SFApiException(e);
 		}
 	}
 	
@@ -144,11 +144,11 @@ public class Auth {
 					.setApiEndpoint((String)resp.get("instance_url"));
 			
 		} catch (JsonParseException e) {
-			throw new RuntimeException(e);
+			throw new SFApiException(e);
 		} catch (JsonMappingException e) {
-			throw new RuntimeException(e);
+			throw new SFApiException(e);
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new SFApiException(e);
 		}
 	}
 
@@ -173,11 +173,11 @@ public class Auth {
 					.setRefreshToken(refreshToken);
 			
 		} catch (JsonParseException e) {
-			throw new RuntimeException(e);
+			throw new SFApiException(e);
 		} catch (JsonMappingException e) {
-			throw new RuntimeException(e);
+			throw new SFApiException(e);
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new SFApiException(e);
 		}
 	}
 	

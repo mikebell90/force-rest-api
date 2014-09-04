@@ -6,6 +6,8 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.force.api.SFApiException;
+
 public class HttpRequest {
 
 	static public HttpRequest formPost() { 
@@ -46,7 +48,7 @@ public class HttpRequest {
 			try {
 				return postParams.toString().getBytes("UTF-8");
 			} catch (UnsupportedEncodingException e) {
-				throw new RuntimeException(e);
+				throw new SFApiException(e);
 			}
 		} else {
 			return contentBytes;
@@ -114,7 +116,7 @@ public class HttpRequest {
 				postParams.append(key+"="+URLEncoder.encode(value, "UTF-8"));
 			}
 		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
+			throw new SFApiException(e);
 		}
 		return this;
 	}
@@ -152,7 +154,7 @@ public class HttpRequest {
 			try {
 				b.append("\n"+new String(getContentBytes(),"UTF-8")+"\n");
 			} catch (UnsupportedEncodingException e) {
-				throw new RuntimeException(e);
+				throw new SFApiException(e);
 			}
 		} else if(contentStream!=null) {
 			b.append("\n[streamed content. Cannot print]\n");

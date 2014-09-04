@@ -1,6 +1,6 @@
 package com.force.api;
 
-public class ApiException extends RuntimeException {
+public class ApiException extends SFApiException {
 
 	private static final long serialVersionUID = 1L;
 
@@ -16,6 +16,12 @@ public class ApiException extends RuntimeException {
 	}
 	public String getMessage() {
 		return message;
+	}
+	
+	public ApiException(String message) {
+		super();
+		this.code = -1;
+		this.message = message;
 	}
 	
 	
