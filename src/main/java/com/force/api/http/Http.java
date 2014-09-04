@@ -17,6 +17,8 @@ import com.force.api.exceptions.SFApiException;
 
 public class Http {
 	private final static Logger log = LoggerFactory.getLogger(Http.class);
+	private static final int CONN_TIMEOUT = 40000;
+	private static final int READ_TIMEOUT = 40000;
 	static final byte[] readResponse(InputStream stream) throws IOException {
 		BufferedInputStream bin = new BufferedInputStream(stream);
 		ByteArrayOutputStream bout = new ByteArrayOutputStream();
@@ -33,6 +35,8 @@ public class Http {
 			HttpURLConnection conn = (HttpURLConnection) new URL(req.getUrl()).openConnection();
 			conn.setInstanceFollowRedirects(true);
 			conn.setRequestMethod(req.getMethod());
+			conn.setConnectTimeout(CONN_TIMEOUT);
+			conn.setReadTimeout(READ_TIMEOUT);
 			for (HttpRequest.Header h : req.getHeaders()) {
 				conn.addRequestProperty(h.getKey(), h.getValue());
 			}

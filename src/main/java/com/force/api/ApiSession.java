@@ -34,6 +34,7 @@ public class ApiSession implements java.io.Serializable {
 	}
 
 	public ApiSession setRefreshToken(String value) {
+		if ((value !=null) && (value.trim().length()==0)) value=null;
 		refreshToken = value;
 		return this;
 	}
