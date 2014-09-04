@@ -12,7 +12,7 @@ public class Identity {
 	String id;
 	boolean assertedUser;
 	String userId;
-	String mobile_phone;
+	String mobilePhone;
 	String organizationId;
 	String username;
 	String nickName;
@@ -217,7 +217,7 @@ public class Identity {
 	public String toString() {
 		return "Identity [id=" + this.id + ", assertedUser="
 				+ this.assertedUser + ", userId=" + this.userId
-				+ ", mobile_phone=" + this.mobile_phone + ", organizationId="
+				+ ", mobile_phone=" + this.mobilePhone + ", organizationId="
 				+ this.organizationId + ", username=" + this.username
 				+ ", nickName=" + this.nickName + ", displayName="
 				+ this.displayName + ", email=" + this.email + ", firstName="
@@ -227,6 +227,14 @@ public class Identity {
 				+ this.userType + ", language=" + this.language + ", locale="
 				+ this.locale + ", utcOffset=" + this.utcOffset
 				+ ", lastModifiedDate=" + this.lastModifiedDate + "]";
+	}
+
+	public String getMobilePhone() {
+		return this.mobilePhone;
+	}
+	@JsonSetter(value="mobile_phone")
+	public void setMobilePhone(String mobilePhone) {
+		this.mobilePhone = mobilePhone;
 	}
 
 	
