@@ -1,5 +1,10 @@
 package com.force.api;
 
+import com.force.api.exceptions.ApiException;
+import com.force.api.exceptions.AuthenticationFailedException;
+import com.force.api.exceptions.RefreshFailedApiException;
+import com.force.api.exceptions.SFApiException;
+import com.force.api.exceptions.SObjectException;
 import com.force.api.http.Http;
 import com.force.api.http.HttpRequest;
 import com.force.api.http.HttpResponse;

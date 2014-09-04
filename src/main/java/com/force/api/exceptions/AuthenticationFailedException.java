@@ -1,4 +1,4 @@
-package com.force.api;
+package com.force.api.exceptions;
 
 public class AuthenticationFailedException extends ApiException {
 

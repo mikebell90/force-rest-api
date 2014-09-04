@@ -6,7 +6,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.force.api.SFApiException;
+import com.force.api.exceptions.SFApiException;
 
 public class HttpRequest {
 

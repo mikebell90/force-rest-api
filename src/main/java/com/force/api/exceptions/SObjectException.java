@@ -1,4 +1,6 @@
-package com.force.api;
+package com.force.api.exceptions;
+
+import com.force.api.ApiError;
 
 public class SObjectException extends SFApiException {
 

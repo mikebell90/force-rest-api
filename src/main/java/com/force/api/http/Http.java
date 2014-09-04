@@ -12,7 +12,7 @@ import java.net.URL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.force.api.SFApiException;
+import com.force.api.exceptions.SFApiException;
 
 
 public class Http {

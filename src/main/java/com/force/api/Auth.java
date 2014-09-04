@@ -14,6 +14,8 @@ import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import com.force.api.exceptions.AuthenticationFailedException;
+import com.force.api.exceptions.SFApiException;
 import com.force.api.http.Http;
 import com.force.api.http.HttpRequest;
 
@@ -196,7 +198,7 @@ public class Auth {
 			// Looks like revoke endpoint closes stream when trying to revoke
 			// an already revoked token. It doesn't return an error code. So
 			// we'll have to just catch it here and fake the code.
-			throw new AuthException(404, "Token could not be revoked. Most likely it has already expired or been revoked.");
+			throw new AuthenticationFailedException(404, "Token could not be revoked. Most likely it has already expired or been revoked.");
 		}
 	}
 

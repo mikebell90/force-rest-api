@@ -8,6 +8,7 @@ import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import com.force.api.exceptions.SFApiException;
 import com.force.api.http.HttpResponse;
 
 /**
