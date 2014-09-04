@@ -88,6 +88,7 @@ public class ForceApi {
 						.method("GET")
 						.header("Accept", "application/json")
 					).getStream(),Map.class);
+			System.out.println("ID="+((String) resp.get("identity")));
 			return getIdentity((String) resp.get("identity"));
 		} catch (JsonParseException e) {
 			throw new SFApiException(e);
