@@ -3,6 +3,7 @@ package com.force.api;
 import com.force.api.http.Http;
 import com.force.api.http.HttpRequest;
 import com.force.api.http.HttpResponse;
+
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParseException;
@@ -200,6 +201,7 @@ public class ForceApi {
         }
     }
 
+	@SuppressWarnings("rawtypes")
 	public QueryResult<Map> query(String query) {
 		return query(query, Map.class);
 	}
@@ -208,7 +210,8 @@ public class ForceApi {
         return queryAny(session.getApiEndpoint() + nextRecordsUrl, clazz);
     }
 
-    public QueryResult<Map> queryMore(String nextRecordsUrl) {
+    @SuppressWarnings("rawtypes")
+	public QueryResult<Map> queryMore(String nextRecordsUrl) {
         return queryMore(nextRecordsUrl, Map.class);
     }
 

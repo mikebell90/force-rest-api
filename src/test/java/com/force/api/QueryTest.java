@@ -59,7 +59,8 @@ public class QueryTest {
         assertFalse(iniResult.isDone());
         assertNotNull(iniResult.getNextRecordsUrl());
 
-        final QueryResult<Map> moreResult = api.queryMore(iniResult.getNextRecordsUrl());
+        @SuppressWarnings("rawtypes")
+		final QueryResult<Map> moreResult = api.queryMore(iniResult.getNextRecordsUrl());
         assertEquals(exceedQueryBatchSize - queryBatchSize, moreResult.getRecords().size());
         assertEquals(exceedQueryBatchSize, moreResult.getTotalSize());
         assertTrue(moreResult.isDone());
