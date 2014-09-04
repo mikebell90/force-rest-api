@@ -53,13 +53,14 @@ public class ForceApi {
 		jsonMapper.setSerializationInclusion(JsonSerialize.Inclusion.NON_NULL);
 	}
 
-	final ApiConfig config;
-	ApiSession session;
+	final private ApiConfig config;
+	private ApiSession session;
 	private boolean autoRenew = false;
+	private TokenRenewalObserver observer=null; 
 
 	public ForceApi(ApiConfig config, ApiSession session) {
 		this.config = config;
-		this.session = session;
+		this.setSession(session);
 		if(session.getRefreshToken()!=null) {
 			autoRenew = true;
 		}
@@ -71,7 +72,7 @@ public class ForceApi {
 
 	public ForceApi(ApiConfig apiConfig) {
 		config = apiConfig;
-		session = Auth.authenticate(apiConfig);
+		setSession(Auth.authenticate(apiConfig));
 		autoRenew  = true;
 
 	}
@@ -215,7 +216,7 @@ public class ForceApi {
 	}
 
     public <T> QueryResult<T> queryMore(String nextRecordsUrl, Class<T> clazz) {
-        return queryAny(session.getApiEndpoint() + nextRecordsUrl, clazz);
+        return queryAny(getSession().getApiEndpoint() + nextRecordsUrl, clazz);
     }
 
     @SuppressWarnings("rawtypes")
@@ -315,25 +316,33 @@ public class ForceApi {
 	}
 	
 	private final String uriBase() {
-		return(session.getApiEndpoint()+"/services/data/"+config.getApiVersion());
+		return(getSession().getApiEndpoint()+"/services/data/"+config.getApiVersion());
 	}
 	
 	private final HttpResponse apiRequest(HttpRequest req) {
-		req.setAuthorization("OAuth "+session.getAccessToken());
+		req.setAuthorization("OAuth "+getSession().getAccessToken());
 		HttpResponse res = Http.send(req);
 		if(res.getResponseCode()==401) {
 			// Perform one attempt to auto renew session if possible
 			if(autoRenew) {
 				log.debug("Session expired. Refreshing session...");
-				if(session.getRefreshToken()!=null) {
-					session = Auth.refreshOauthTokenFlow(config, session.getRefreshToken());
+				if (this.observer !=null) this.observer.tokenAboutToChange();
+				if(getSession().getRefreshToken()!=null) {
+					try {
+						setSession(Auth.refreshOauthTokenFlow(config, getSession().getRefreshToken()));
+						if (this.observer !=null) this.observer.tokenRenewedSuccessfully(session);
+					} catch (RuntimeException e) {
+						if (this.observer !=null) this.observer.tokenNotRenewedSuccessfully();
+						throw e;
+					}
 				} else {
-					session = Auth.authenticate(config);
+					setSession(Auth.authenticate(config));
 				}
-				req.setAuthorization("OAuth "+session.getAccessToken());
+				req.setAuthorization("OAuth "+getSession().getAccessToken());
 				res = Http.send(req);
 				if (res.getResponseCode()==401) throw new RefreshFailedApiException(401,"Tried to refresh but failed.");
 			} else {
+				if (this.observer !=null) this.observer.tokenNotRenewedSuccessfully();
 				throw new AuthenticationFailedException(401,"No refresh token, and 401 found");
 			}
 			
@@ -437,5 +446,25 @@ public class ForceApi {
 		}
 		return newNode;
 		
+	}
+
+	public ApiConfig getConfig() {
+		return this.config;
+	}
+
+	public ApiSession getSession() {
+		return session;
+	}
+
+	public void setSession(ApiSession session) {
+		this.session = session;
+	}
+
+	public TokenRenewalObserver getTokenRenewalObserver() {
+		return this.observer;
+	}
+
+	public void setTokenRenewalObserver(TokenRenewalObserver observer) {
+		this.observer = observer;
 	}
 }

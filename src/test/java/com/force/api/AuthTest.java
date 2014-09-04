@@ -14,9 +14,9 @@ public class AuthTest {
 			.setUsername(Fixture.get("username"))
 			.setPassword(Fixture.get("password")));
 
-		assertNotNull(api.session);
-		assertNotNull(api.session.accessToken);
-		assertNotNull(api.session.apiEndpoint);
+		assertNotNull(api.getSession());
+		assertNotNull(api.getSession().accessToken);
+		assertNotNull(api.getSession().apiEndpoint);
 
 	}
 	
@@ -61,9 +61,9 @@ public class AuthTest {
 			.setClientId(Fixture.get("clientId"))
 			.setClientSecret(Fixture.get("clientSecret")));
 
-		assertNotNull(api.session);
-		assertNotNull(api.session.accessToken);
-		assertNotNull(api.session.apiEndpoint);
+		assertNotNull(api.getSession());
+		assertNotNull(api.getSession().accessToken);
+		assertNotNull(api.getSession().apiEndpoint);
 
 	}
 	
@@ -76,8 +76,8 @@ public class AuthTest {
 		ForceApi api = new ForceApi(c);
 
 		ApiSession session = new ApiSession()
-			.setAccessToken(api.session.accessToken)
-			.setApiEndpoint(api.session.apiEndpoint);
+			.setAccessToken(api.getSession().accessToken)
+			.setApiEndpoint(api.getSession().apiEndpoint);
 		
 		ForceApi api2 = new ForceApi(c,session);
 		
