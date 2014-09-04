@@ -17,7 +17,7 @@ public class SessionRefreshTest {
 
 		assertNotNull(api.getIdentity());
 		// This call is not available in public api
-		Auth.revokeToken(api.getConfig(), api.getSession().accessToken);
+		Auth.revokeToken(api.getConfig(), api.getSession().getAccessToken());
 
 		Identity id = null;
 		for(int i=0;i<5;i++) {

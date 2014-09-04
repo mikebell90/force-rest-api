@@ -4,9 +4,9 @@ public class ApiSession implements java.io.Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	String accessToken;
-	String apiEndpoint;
-	String refreshToken;
+	private String accessToken;
+	private String apiEndpoint;
+	private String refreshToken;
 
 	public ApiSession() {}
 	

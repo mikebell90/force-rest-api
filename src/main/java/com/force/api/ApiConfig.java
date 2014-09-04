@@ -5,13 +5,13 @@ import java.net.URLDecoder;
 
 public class ApiConfig {
 
-	ApiVersion apiVersion = ApiVersion.DEFAULT_VERSION;
-	String username;
-	String password;
-	String loginEndpoint = "https://login.salesforce.com";
+	private ApiVersion apiVersion = ApiVersion.DEFAULT_VERSION;
+	private String username;
+	private String password;
+	private String loginEndpoint = "https://login.salesforce.com";
 	String clientId;
-	String clientSecret;
-	String redirectURI;
+	private String clientSecret;
+	private String redirectURI;
 
 	public ApiConfig clone() {
 		return new ApiConfig()
@@ -23,7 +23,10 @@ public class ApiConfig {
 			.setClientSecret(clientSecret)
 			.setRedirectURI(redirectURI);
 	}
-	
+	public ApiConfig() { }
+	public ApiConfig(ApiVersion apiVersion) {
+		this.apiVersion=apiVersion;
+	}
 	public ApiConfig setForceURL(String url) {
 		try {
 			URI uri = new URI(url);

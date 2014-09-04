@@ -15,8 +15,8 @@ public class AuthTest {
 			.setPassword(Fixture.get("password")));
 
 		assertNotNull(api.getSession());
-		assertNotNull(api.getSession().accessToken);
-		assertNotNull(api.getSession().apiEndpoint);
+		assertNotNull(api.getSession().getAccessToken());
+		assertNotNull(api.getSession().getApiEndpoint());
 
 	}
 	
@@ -24,26 +24,26 @@ public class AuthTest {
 	public void testForceURL() {
 		
 		ApiConfig c = new ApiConfig().setForceURL("force://login.salesforce.com?user=testuser@domain.com&password=pwd123");
-		assertEquals("testuser@domain.com",c.username);
-		assertEquals("pwd123", c.password);
-		assertEquals("https://login.salesforce.com",c.loginEndpoint);
+		assertEquals("testuser@domain.com",c.getUsername());
+		assertEquals("pwd123", c.getPassword());
+		assertEquals("https://login.salesforce.com",c.getLoginEndpoint());
 
 		c = new ApiConfig().setForceURL("force://login.salesforce.com:443?user=testuser@domain.com&password=pwd123");
-		assertEquals("testuser@domain.com",c.username);
-		assertEquals("pwd123", c.password);
-		assertEquals("https://login.salesforce.com:443",c.loginEndpoint);
+		assertEquals("testuser@domain.com",c.getUsername());
+		assertEquals("pwd123", c.getPassword());
+		assertEquals("https://login.salesforce.com:443",c.getLoginEndpoint());
 
 		c = new ApiConfig().setForceURL("force://login.salesforce.com:443?user=testuser@domain.com&password=pwd123&oauth_key=key123&oauth_secret=secret123");
-		assertEquals("testuser@domain.com",c.username);
-		assertEquals("pwd123", c.password);
-		assertEquals("https://login.salesforce.com:443",c.loginEndpoint);
-		assertEquals("key123",c.clientId);
-		assertEquals("secret123", c.clientSecret);
+		assertEquals("testuser@domain.com",c.getUsername());
+		assertEquals("pwd123", c.getPassword());
+		assertEquals("https://login.salesforce.com:443",c.getLoginEndpoint());
+		assertEquals("key123",c.getClientId());
+		assertEquals("secret123", c.getClientSecret());
 
 		c = new ApiConfig().setForceURL("force://login.salesforce.com:443?oauth_key=key123&oauth_secret=secret123");
-		assertEquals("https://login.salesforce.com:443",c.loginEndpoint);
-		assertEquals("key123",c.clientId);
-		assertEquals("secret123", c.clientSecret);
+		assertEquals("https://login.salesforce.com:443",c.getLoginEndpoint());
+		assertEquals("key123",c.getClientId());
+		assertEquals("secret123", c.getClientSecret());
 		
 		try {
 			c = new ApiConfig().setForceURL("login.salesforce.com:443?oauth_key=key123&oauth_secret=secret123");
@@ -62,8 +62,8 @@ public class AuthTest {
 			.setClientSecret(Fixture.get("clientSecret")));
 
 		assertNotNull(api.getSession());
-		assertNotNull(api.getSession().accessToken);
-		assertNotNull(api.getSession().apiEndpoint);
+		assertNotNull(api.getSession().getAccessToken());
+		assertNotNull(api.getSession().getApiEndpoint());
 
 	}
 	
@@ -76,8 +76,8 @@ public class AuthTest {
 		ForceApi api = new ForceApi(c);
 
 		ApiSession session = new ApiSession()
-			.setAccessToken(api.getSession().accessToken)
-			.setApiEndpoint(api.getSession().apiEndpoint);
+			.setAccessToken(api.getSession().getAccessToken())
+			.setApiEndpoint(api.getSession().getApiEndpoint());
 		
 		ForceApi api2 = new ForceApi(c,session);
 		
