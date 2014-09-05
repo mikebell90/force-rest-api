@@ -18,6 +18,9 @@
         <url>file:///${basedir}/release-repo/repository/</url>
       </repository>
     </distributionManagement>
+	<properties>
+			<java.source.version>1.7</java.source.version>
+	</properties>
 
     <dependencies>
         <dependency>
