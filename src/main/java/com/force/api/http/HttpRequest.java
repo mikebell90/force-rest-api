@@ -30,6 +30,7 @@ public class HttpRequest {
 
 	StringBuilder postParams = new StringBuilder();
 
+	private boolean gzip;
 	private String authorization;
 	
 	public HttpRequest(ResponseFormat format) {
@@ -59,7 +60,9 @@ public class HttpRequest {
 	public InputStream getContentStream() {
 		return contentStream;
 	}
-
+	public boolean isGzip() {
+		return this.gzip;
+	}
 	public String getUrl() {
 		return url;
 	}
@@ -95,6 +98,11 @@ public class HttpRequest {
 
 	public HttpRequest method(String value) {
 		method = value;
+		return this;
+	}
+	
+	public  HttpRequest gzip(boolean gzip) {
+		this.gzip=gzip;
 		return this;
 	}
 	

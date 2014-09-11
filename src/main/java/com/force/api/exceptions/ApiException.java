@@ -23,6 +23,11 @@ public class ApiException extends SFApiException {
 		this.code = -1;
 		this.message = message;
 	}
+	@Override
+	public String toString() {
+		return "ApiException [code=" + code + ", message=" + message
+				+ ", toString()=" + super.toString() + "]";
+	}
 	
 	
 	

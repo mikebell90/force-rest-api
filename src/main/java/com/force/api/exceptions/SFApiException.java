@@ -39,7 +39,13 @@ public class SFApiException extends RuntimeException
         this.item=item;
     }
 
-    public String getItem() {
+    @Override
+	public String toString() {
+		return "SFApiException [item=" + item + ", toString()="
+				+ super.toString() + "]";
+	}
+
+	public String getItem() {
         return this.item;
     }
 

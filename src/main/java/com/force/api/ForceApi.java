@@ -15,6 +15,7 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
@@ -52,14 +53,16 @@ public class ForceApi {
 
 	static {
 		jsonMapper = new ObjectMapper();
+		jsonMapper.configure(SerializationConfig.Feature.WRITE_DATES_AS_TIMESTAMPS, false);
 		jsonMapper.setSerializationInclusion(JsonSerialize.Inclusion.NON_NULL);
 	}
 
+	public static ObjectMapper getMapper() { return jsonMapper; }
 	final private ApiConfig config;
 	private ApiSession session;
 	private boolean autoRenew = false;
 	private TokenRenewalObserver observer=null; 
-
+	private boolean gzip=false;
 	public ForceApi(ApiConfig config, ApiSession session) {
 		this.config = config;
 		this.setSession(session);
@@ -78,7 +81,10 @@ public class ForceApi {
 		autoRenew  = true;
 
 	}
-
+	
+	public void setGzip(boolean gzip) {
+		this.gzip=gzip;
+	}
 
 	public Identity getIdentity() {
 		try (InputStream is=
@@ -345,7 +351,9 @@ public class ForceApi {
 	}
 	
 	private final HttpResponse apiRequest(HttpRequest req) {
+		
 		req.setAuthorization("OAuth "+getSession().getAccessToken());
+		req=req.gzip(gzip);
 		HttpResponse res = Http.send(req);
 		if(res.getResponseCode()==401) {
 			// Perform one attempt to auto renew session if possible
@@ -380,7 +388,7 @@ public class ForceApi {
 			}
 		} else if(req.getExpectedCode()!=-1 && res.getResponseCode()!=req.getExpectedCode()) {
 			throw new ApiException("Unexpected response from Force API. Got response code "+res.getResponseCode()+
-					". Was expecing "+req.getExpectedCode());
+					". Was expecting "+req.getExpectedCode()+" "+res.getString());
 		} else {
 			return res;
 		}

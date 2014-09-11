@@ -9,11 +9,13 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.zip.GZIPInputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.force.api.exceptions.SFApiException;
+import com.force.api.http.HttpRequest.ResponseFormat;
 
 
 public class Http {
@@ -43,6 +45,9 @@ public class Http {
 			for (HttpRequest.Header h : req.getHeaders()) {
 				conn.addRequestProperty(h.getKey(), h.getValue());
 			}
+			if ((req.isGzip()) && req.getResponseFormat().equals(ResponseFormat.STREAM)) {
+				conn.addRequestProperty("Request-Encoding", "gzip");
+			}
 			if(req.getAuthorization()!=null) {
 				conn.addRequestProperty("Authorization", req.getAuthorization());
 			}
@@ -62,8 +67,13 @@ public class Http {
 				os.flush();
 			}			
 			int code = conn.getResponseCode();
+			String encoding=conn.getContentEncoding();
+			boolean gzipResponse=encoding != null && encoding.equalsIgnoreCase("gzip");
+			System.out.println(gzipResponse+" "+encoding);
 			if (code < 300 && code >= 200) {
-				is = conn.getInputStream();
+				
+				is = gzipResponse ? new GZIPInputStream(conn.getInputStream()): conn.getInputStream();
+				
 				switch (req.getResponseFormat()) {
 				
 				case BYTE: {					
@@ -83,7 +93,7 @@ public class Http {
 				}
 			} else {				
 				log.error("Bad response code: " + code + " on request:\n" + req);
-				is=conn.getErrorStream();
+				is = gzipResponse ? new GZIPInputStream(conn.getErrorStream()): conn.getErrorStream();
 				HttpResponse r = new HttpResponse().setString(
 						new String(readResponse(is), "UTF-8")).setResponseCode(code);
 				return r;
