@@ -1,5 +1,14 @@
 package com.force.api;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.force.api.exceptions.ApiException;
 import com.force.api.exceptions.AuthenticationFailedException;
 import com.force.api.exceptions.RefreshFailedApiException;
@@ -10,15 +19,6 @@ import com.force.api.http.HttpRequest;
 import com.force.api.http.HttpResponse;
 import com.force.api.http.HttpRequest.ResponseFormat;
 
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.codehaus.jackson.node.JsonNodeFactory;
-import org.codehaus.jackson.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,8 +53,8 @@ public class ForceApi {
 
 	static {
 		jsonMapper = new ObjectMapper();
-		jsonMapper.configure(SerializationConfig.Feature.WRITE_DATES_AS_TIMESTAMPS, false);
-		jsonMapper.setSerializationInclusion(JsonSerialize.Inclusion.NON_NULL);
+		jsonMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+		jsonMapper.setSerializationInclusion(Include.NON_NULL);
 	}
 
 	public static ObjectMapper getMapper() { return jsonMapper; }
@@ -269,14 +269,15 @@ public class ForceApi {
 
             QueryResult<T> result = new QueryResult<T>();
             JsonNode root = jsonMapper.readTree(is);
-            result.setDone(root.get("done").getBooleanValue());
-            result.setTotalSize(root.get("totalSize").getIntValue());
+            result.setDone(root.get("done").booleanValue());
+            result.setTotalSize(root.get("totalSize").intValue());
             if (root.get("nextRecordsUrl") != null) {
-                result.setNextRecordsUrl(root.get("nextRecordsUrl").getTextValue());
+                result.setNextRecordsUrl(root.get("nextRecordsUrl").textValue());
             }
             List<T> records = new ArrayList<T>();
             for (JsonNode elem : root.get("records")) {
-                records.add(jsonMapper.readValue(normalizeCompositeResponse(elem), clazz));
+                records.add(jsonMapper.readValue(
+                		jsonMapper.treeAsTokens(normalizeCompositeResponse(elem)), clazz));
             }
             result.setRecords(records);
             return result;
@@ -314,10 +315,12 @@ public class ForceApi {
                     .expectsCode(200)).getStream()){
 
             final JsonNode root = jsonMapper.readTree(is);
-            final DescribeSObjectBasic describeSObjectBasic = jsonMapper.readValue(root.get("objectDescribe"), DescribeSObjectBasic.class);
+            final DescribeSObjectBasic describeSObjectBasic = jsonMapper.readValue(
+            		jsonMapper.treeAsTokens(root.get("objectDescribe")), DescribeSObjectBasic.class);
             final List<T> recentItems = new ArrayList<T>();
             for(JsonNode item : root.get("recentItems")) {
-                recentItems.add(jsonMapper.readValue(item, clazz));
+                recentItems.add(jsonMapper.readValue(
+                		jsonMapper.treeAsTokens(item), clazz));
             }
             return new DiscoverSObject<T>(describeSObjectBasic, recentItems);
         } catch (JsonParseException e) {
@@ -463,7 +466,7 @@ public class ForceApi {
 	 * @return
 	 */
 	private final JsonNode normalizeCompositeResponse(JsonNode node){
-		Iterator<Entry<String, JsonNode>> elements = node.getFields();
+		Iterator<Entry<String, JsonNode>> elements = node.fields();
 		ObjectNode newNode = JsonNodeFactory.instance.objectNode();
 		Entry<String, JsonNode> currNode;
 		while(elements.hasNext()){

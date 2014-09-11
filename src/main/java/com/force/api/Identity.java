@@ -3,8 +3,9 @@ package com.force.api;
 import java.util.Date;
 import java.util.Map;
 
-import org.codehaus.jackson.annotate.JsonSetter;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonSetter;
+
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Identity {

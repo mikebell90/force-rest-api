@@ -25,9 +25,10 @@
  */
 package com.force.api;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 import java.util.*;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * This class represents a JSON response from /services/data/v{version}/sobjects/{sobjectName}/describe It has all of

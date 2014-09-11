@@ -1,8 +1,9 @@
 package com.force.api;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * @author Ryan Brainard
