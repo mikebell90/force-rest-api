@@ -45,8 +45,10 @@ public class Http {
 			for (HttpRequest.Header h : req.getHeaders()) {
 				conn.addRequestProperty(h.getKey(), h.getValue());
 			}
+			
 			if ((req.isGzip()) && req.getResponseFormat().equals(ResponseFormat.STREAM)) {
-				conn.addRequestProperty("Request-Encoding", "gzip");
+//				System.out.println("add");
+				conn.addRequestProperty("Accept-Encoding", "gzip");
 			}
 			if(req.getAuthorization()!=null) {
 				conn.addRequestProperty("Authorization", req.getAuthorization());
@@ -69,7 +71,7 @@ public class Http {
 			int code = conn.getResponseCode();
 			String encoding=conn.getContentEncoding();
 			boolean gzipResponse=encoding != null && encoding.equalsIgnoreCase("gzip");
-			System.out.println(gzipResponse+" "+encoding);
+			//System.out.println(gzipResponse+" "+encoding);
 			if (code < 300 && code >= 200) {
 				
 				is = gzipResponse ? new GZIPInputStream(conn.getInputStream()): conn.getInputStream();
