@@ -6,12 +6,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 
-import com.force.api.ForceApi;
 
-public class JsonDataSource<T> implements DataSourceWithFileName {
+public class StringDataSource implements DataSourceWithFileName {
 
-	final private T item;
-	public JsonDataSource(T item) {
+	final private String item;
+	public StringDataSource(String item) {
 		this.item=item;
 	}
 	@Override
@@ -20,9 +19,8 @@ public class JsonDataSource<T> implements DataSourceWithFileName {
 	}
 
 	@Override
-	public InputStream getInputStream() throws IOException {
-		String j= ForceApi.getMapper().writeValueAsString(item);
-		return new ByteArrayInputStream(j.getBytes("UTF-8"));
+	public InputStream getInputStream() throws IOException {		
+		return new ByteArrayInputStream(this.item.getBytes("UTF-8"));
 	}
 
 	@Override

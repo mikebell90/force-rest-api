@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
@@ -26,7 +27,7 @@ public class MultipartUtility implements AutoCloseable {
 	private String charset;
 	private OutputStream outputStream;
 	private PrintWriter writer;
-
+	private StringWriter ss;
 	/**
 	 * This constructor initializes a new HTTP POST request with content type
 	 * is set to multipart/form-data
@@ -35,24 +36,27 @@ public class MultipartUtility implements AutoCloseable {
 	 * @throws IOException
 	 */
 	public MultipartUtility(String requestURL, String charset)
-		 {
+	{
 		this.charset = charset;
 		this.url=requestURL;
 		// creates a unique boundary based on time stamp
 		boundary = "===" + UUID.randomUUID().toString().replace("-", "") + "===";		
 	}
 
-	public void initialize() throws IOException {
+	public void initialize(String accessToken) throws IOException {
 		URL url = new URL(this.url);
 		httpConn = (HttpURLConnection) url.openConnection();
 		httpConn.setUseCaches(false);
 		httpConn.setDoOutput(true);	// indicates POST method
 		httpConn.setDoInput(true);
+		httpConn.setRequestProperty("Authorization", "OAuth "+accessToken);
 		httpConn.setRequestProperty("Content-Type",
 				"multipart/form-data; boundary=" + boundary);
 		outputStream = httpConn.getOutputStream();
 		writer = new PrintWriter(new OutputStreamWriter(outputStream, charset),
 				true);
+		this.ss=new StringWriter();
+		writer =new PrintWriter(ss);
 
 	}
 	/**
@@ -63,7 +67,7 @@ public class MultipartUtility implements AutoCloseable {
 	public void addFormField(String name, String value,String contentType) {
 		writer.append("--" + boundary).append(LINE_FEED);
 		writer.append("Content-Disposition: form-data; name=\"" + name + "\"")
-				.append(LINE_FEED);
+		.append(LINE_FEED);
 		writer.append("Content-Type: "+contentType+"; charset=" + charset).append(
 				LINE_FEED);
 		writer.append(LINE_FEED);
@@ -83,12 +87,12 @@ public class MultipartUtility implements AutoCloseable {
 		writer.append("--" + boundary).append(LINE_FEED);
 		writer.append(
 				"Content-Disposition: form-data; name=\"" + fieldName
-						+ "\"; filename=\"" + fileName + "\"")
+				+ "\"; filename=\"" + fileName + "\"")
 				.append(LINE_FEED);
 		writer.append(
 				"Content-Type: "
 						+ URLConnection.guessContentTypeFromName(fileName))
-				.append(LINE_FEED);
+						.append(LINE_FEED);
 		writer.append("Content-Transfer-Encoding: binary").append(LINE_FEED);
 		writer.append(LINE_FEED);
 		writer.flush();
@@ -101,7 +105,7 @@ public class MultipartUtility implements AutoCloseable {
 		}
 		outputStream.flush();
 		inputStream.close();
-		
+
 		writer.append(LINE_FEED);
 		writer.flush();		
 	}
@@ -119,32 +123,34 @@ public class MultipartUtility implements AutoCloseable {
 		writer.append("--" + boundary).append(LINE_FEED);
 		writer.append(
 				"Content-Disposition: form-data; name=\"" + fieldName
-						+ "\"");
+				+ "\"");
 		if (fileName != null) writer.append("; filename=\"" + fileName.replace("\"", "") + "\"");
 		writer.append(LINE_FEED);
 		writer.append(
 				"Content-Type: "
 						+ source.getContentType());
 		writer.append(LINE_FEED);
-		writer.append("Content-Transfer-Encoding: binary").append(LINE_FEED);
+		if (!source.getContentType().contains("json")) {
+			writer.append("Content-Transfer-Encoding: binary").append(LINE_FEED);
+		}
 		writer.append(LINE_FEED);
 		writer.flush();
 
 		try (InputStream is=source.getInputStream()) {
-		byte[] buffer = new byte[4096];
-		int bytesRead = -1;
-		while ((bytesRead = is.read(buffer)) != -1) {
-			outputStream.write(buffer, 0, bytesRead);
+			byte[] buffer = new byte[4096];
+			int bytesRead = -1;
+			while ((bytesRead = is.read(buffer)) != -1) {
+				outputStream.write(buffer, 0, bytesRead);
+			}
+			outputStream.flush();
 		}
-		outputStream.flush();
-		}
-		
-		
+
+
 		writer.append(LINE_FEED);
 		writer.flush();		
 	}
 
-	
+
 	/**
 	 * Adds a header field to the request.
 	 * @param name - name of the header field
@@ -154,7 +160,7 @@ public class MultipartUtility implements AutoCloseable {
 		writer.append(name + ": " + value).append(LINE_FEED);
 		writer.flush();
 	}
-	
+
 	/**
 	 * Completes the request and receives response from the server.
 	 * @return a list of Strings as response in case the server returned
@@ -162,20 +168,20 @@ public class MultipartUtility implements AutoCloseable {
 	 * @throws IOException
 	 */
 	public HttpResponse finish() throws IOException {
-//		
+		//		
 		StringBuilder response=new StringBuilder(4096);
 		writer.append(LINE_FEED).flush();
 		writer.append("--" + boundary + "--").append(LINE_FEED);
 		writer.close();
-
+		System.out.print(ss.toString());
 		// checks server's status code first
 		int status = httpConn.getResponseCode();
 		if (status == HttpURLConnection.HTTP_OK) {
-			try (			BufferedReader reader = new BufferedReader(new InputStreamReader(
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(
 					httpConn.getInputStream()))) {		
-			while ((reader.readLine()) != null) {
-				response.append(response);
-			}
+				while ((reader.readLine()) != null) {
+					response.append(response);
+				}
 			}			
 			httpConn.disconnect();
 			HttpResponse res=new HttpResponse();
