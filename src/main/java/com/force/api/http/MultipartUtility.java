@@ -120,7 +120,7 @@ public class MultipartUtility implements AutoCloseable {
 		writer.append(
 				"Content-Disposition: form-data; name=\"" + fieldName
 						+ "\"");
-		if (fileName != null) writer.append("; filename=\"" + fileName + "\"");
+		if (fileName != null) writer.append("; filename=\"" + fileName.replace("\"", "") + "\"");
 		writer.append(LINE_FEED);
 		writer.append(
 				"Content-Type: "
