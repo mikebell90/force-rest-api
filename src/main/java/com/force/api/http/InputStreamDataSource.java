@@ -4,13 +4,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import javax.activation.DataSource;
-
-public class InputStreamDataSource implements DataSource {
+public class InputStreamDataSource implements DataSourceWithFileName {
 	final private InputStream is;
 	final private String name;
-	public InputStreamDataSource(InputStream is,String name) {
+	private String fieldName;
+	public InputStreamDataSource(InputStream is,String name,String fieldName) {
 		this.name=name;
+		this.fieldName=fieldName;
 		this.is=is;
 	}
 	@Override
@@ -32,6 +32,10 @@ public class InputStreamDataSource implements DataSource {
 	public OutputStream getOutputStream() throws IOException {
 		//
 		return null;
+	}
+	@Override
+	public String getFileName() {
+		return this.fieldName;
 	}
 
 }

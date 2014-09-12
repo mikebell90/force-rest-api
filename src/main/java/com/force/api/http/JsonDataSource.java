@@ -9,7 +9,7 @@ import javax.activation.DataSource;
 
 import com.force.api.ForceApi;
 
-public class JsonDataSource<T> implements DataSource {
+public class JsonDataSource<T> implements DataSourceWithFileName {
 
 	final private T item;
 	public JsonDataSource(T item) {
@@ -33,6 +33,10 @@ public class JsonDataSource<T> implements DataSource {
 
 	@Override
 	public OutputStream getOutputStream() throws IOException {
+		return null;
+	}
+	@Override
+	public String getFileName() {
 		return null;
 	}
 

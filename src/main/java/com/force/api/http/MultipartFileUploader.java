@@ -4,43 +4,28 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import com.force.api.ApiSession;
+import com.force.api.exceptions.SFApiException;
+
 
 /**
- * This program demonstrates a usage of the MultipartUtility class.
- * @author www.codejava.net
  *
  */
 public class MultipartFileUploader {
 
-	public static void main(String[] args) {
-		String charset = "UTF-8";
-		File uploadFile1 = new File("e:/Test/PIC1.JPG");
-		File uploadFile2 = new File("e:/Test/PIC2.JPG");
-		String requestURL = "http://localhost:8080/FileUploadSpringMVC/uploadFile.do";
+	public HttpResponse upload(List<DataSourceWithFileName> sources,String requestURL,ApiSession session) {
 
-		try (MultipartUtility multipart = new MultipartUtility(requestURL, charset)){
+		try (MultipartUtility multipart = new MultipartUtility(requestURL, "UTF-8")){
 			
 			multipart.initialize();
-			multipart.addHeaderField("User-Agent", "CodeJava");
-			multipart.addHeaderField("Test-Header", "Header-Value");
-			
-			//multipart.addFormField("description", "Cool Pictures");
-			//multipart.addFormField("keywords", "Java,upload,Spring");
-			
-			multipart.addFilePart("fileUpload", uploadFile1);
-			multipart.addFilePart("fileUpload", uploadFile2);
-
-			List<String> response = multipart.finish();
-			
-			System.out.println("SERVER REPLIED:");
-			
-			for (String line : response) {
-				System.out.println(line);
+			multipart.addHeaderField("Authorization", "OAuth "+session.getAccessToken());
+			for (DataSourceWithFileName source : sources) {
+				multipart.addDataSourcePart(source);
 			}
+
+			return multipart.finish();
 		} catch (IOException ex) {
-			System.err.println(ex);
-		} finally {
-			// add closing
-		}
+			throw new SFApiException(ex);
+		} 
 	}
 }

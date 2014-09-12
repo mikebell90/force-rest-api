@@ -12,15 +12,10 @@ import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.UUID;
 
-import javax.activation.DataSource;
 
 /**
- * This utility class provides an abstraction layer for sending multipart HTTP
- * POST requests to a web server. 
- * @author www.codejava.net
  *
  */
 public class MultipartUtility implements AutoCloseable {
@@ -44,7 +39,7 @@ public class MultipartUtility implements AutoCloseable {
 		this.charset = charset;
 		this.url=requestURL;
 		// creates a unique boundary based on time stamp
-		boundary = "===" + System.currentTimeMillis() + "===";		
+		boundary = "===" + UUID.randomUUID().toString().replace("-", "") + "===";		
 	}
 
 	public void initialize() throws IOException {
@@ -55,8 +50,6 @@ public class MultipartUtility implements AutoCloseable {
 		httpConn.setDoInput(true);
 		httpConn.setRequestProperty("Content-Type",
 				"multipart/form-data; boundary=" + boundary);
-		httpConn.setRequestProperty("User-Agent", "CodeJava Agent");
-		httpConn.setRequestProperty("Test", "Bonjour");
 		outputStream = httpConn.getOutputStream();
 		writer = new PrintWriter(new OutputStreamWriter(outputStream, charset),
 				true);
@@ -119,14 +112,16 @@ public class MultipartUtility implements AutoCloseable {
 	 * @param uploadFile a File to be uploaded 
 	 * @throws IOException
 	 */
-	public void addDataSourcePart(DataSource source,String fieldName)
+	public void addDataSourcePart(DataSourceWithFileName source)
 			throws IOException {	
-		String fileName = source.getName();
+		String fieldName = source.getName();
+		String fileName=source.getFileName();
 		writer.append("--" + boundary).append(LINE_FEED);
 		writer.append(
 				"Content-Disposition: form-data; name=\"" + fieldName
-						+ "\"; filename=\"" + fileName + "\"")
-				.append(LINE_FEED);
+						+ "\"");
+		if (fileName != null) writer.append("; filename=\"" + fileName + "\"");
+		writer.append(LINE_FEED);
 		writer.append(
 				"Content-Type: "
 						+ source.getContentType());
