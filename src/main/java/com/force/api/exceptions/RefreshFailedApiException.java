@@ -1,6 +1,6 @@
 package com.force.api.exceptions;
 
-public class RefreshFailedApiException extends ApiException {
+public class RefreshFailedApiException extends AuthenticationFailedException {
 
 	/**
 	 * 
