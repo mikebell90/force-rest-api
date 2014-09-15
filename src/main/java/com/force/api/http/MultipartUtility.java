@@ -9,11 +9,12 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.UUID;
+
+import com.force.api.exceptions.ApiException;
 
 
 /**
@@ -27,7 +28,6 @@ public class MultipartUtility implements AutoCloseable {
 	private String charset;
 	private OutputStream outputStream;
 	private PrintWriter writer;
-	private StringWriter ss;
 	/**
 	 * This constructor initializes a new HTTP POST request with content type
 	 * is set to multipart/form-data
@@ -40,7 +40,7 @@ public class MultipartUtility implements AutoCloseable {
 		this.charset = charset;
 		this.url=requestURL;
 		// creates a unique boundary based on time stamp
-		boundary = "===" + UUID.randomUUID().toString().replace("-", "") + "===";		
+		boundary = "--=_" + UUID.randomUUID().toString().replace("-", "") + "===";		
 	}
 
 	public void initialize(String accessToken) throws IOException {
@@ -55,8 +55,7 @@ public class MultipartUtility implements AutoCloseable {
 		outputStream = httpConn.getOutputStream();
 		writer = new PrintWriter(new OutputStreamWriter(outputStream, charset),
 				true);
-		this.ss=new StringWriter();
-		writer =new PrintWriter(ss);
+		
 
 	}
 	/**
@@ -173,14 +172,15 @@ public class MultipartUtility implements AutoCloseable {
 		writer.append(LINE_FEED).flush();
 		writer.append("--" + boundary + "--").append(LINE_FEED);
 		writer.close();
-		System.out.print(ss.toString());
+		//System.out.print(ss.toString());
 		// checks server's status code first
 		int status = httpConn.getResponseCode();
-		if (status == HttpURLConnection.HTTP_OK) {
+		if ( (status < 300 && status >= 200) ) {
 			try (BufferedReader reader = new BufferedReader(new InputStreamReader(
-					httpConn.getInputStream()))) {		
-				while ((reader.readLine()) != null) {
-					response.append(response);
+					httpConn.getInputStream()))) {
+				String r=null;
+				while ((r=reader.readLine()) != null) {
+					response.append(r);
 				}
 			}			
 			httpConn.disconnect();
@@ -189,7 +189,15 @@ public class MultipartUtility implements AutoCloseable {
 			res.setResponseCode(status);
 			return res;
 		} else {
-			throw new IOException("Server returned non-OK status: " + status);
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+					httpConn.getErrorStream()))) {	
+				String r=null;
+				while ((r=reader.readLine()) != null) {
+					response.append(r);
+				}
+			}			
+
+			throw new ApiException(status,response.toString());
 		}
 	}
 

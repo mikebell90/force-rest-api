@@ -28,20 +28,68 @@ public class MultipartFileUploader {
 	
 	}
 	
-	public static void main(String[] args) throws IOException {
+	public static void addToNote(String parentID,String session) throws Exception {
 		MultipartFileUploader u=new MultipartFileUploader();
-		String folderID="00lo0000000aONOAA2";
-		String session="00Do0000000KLYP!AR8AQBqzIoj.q17eWcY9bdP6Oqsm7SF3zvbEZEZPuuY2PBIID5O8GHQttUOCve1t59OP_3UpchPmHlzbO8Lc_D1LLF0eG.JZ";
+		parentID="006o0000003etjy";
+		
+		session="00Do0000000KLYP!AR8AQMkQrsij5wAUm8pRXKy5xAeCILUW6othxI17TqOASN7JwnCRZExmNWZe.VHK_JOPEt.pworgr.ZeEDhYpNGzlPWx3G0R";
+		List<DataSourceWithFileName> sources=new ArrayList<DataSourceWithFileName>();
+		DataSourceWithFileName json=
+				new StringDataSource("{ \"Description\" : \"A note for Q1 2011\",\"ParentId\" : \""+parentID+"\",\"Name\" : \"MyNoteAttachment\"  }");
+		
+		/*
+		 * 
+		 * SELECT Body,BodyLength,ContentType,CreatedById,CreatedDate,Description,Id,IsDeleted,IsPrivate,LastModifiedById,LastModifiedDate,Name,OwnerId,ParentId,SystemModstamp FROM Attachment*/
+		sources.add(json);
+		// needs better closing
+		try (InputStream is=new FileInputStream("c:\\users\\michael\\desktop\\api_rest.pdf"))  {
+			DataSourceWithFileName data=new InputStreamDataSource(is, "Body", "happy.pdf");
+			sources.add(data);
+			String requestURL="https://na17.salesforce.com/services/data/v31.0/sobjects/Attachment";
+			System.out.println(u.upload(sources, requestURL, session).getString());
+		}
+	}
+	public static void addToChatter(String parentID,String session) throws Exception {
+		MultipartFileUploader u=new MultipartFileUploader();
+		parentID="003o0000003POisAAG";
+	
+		session="00Do0000000KLYP!AR8AQMkQrsij5wAUm8pRXKy5xAeCILUW6othxI17TqOASN7JwnCRZExmNWZe.VHK_JOPEt.pworgr.ZeEDhYpNGzlPWx3G0R";
+		List<DataSourceWithFileName> sources=new ArrayList<DataSourceWithFileName>();
+		DataSourceWithFileName json=
+				new StringDataSource("{ \"ContentType\" : \"application/octet-stream\",\"Body\" : \"Hi\", \"Title\" : \"A title\",\"Type\" : \"ContentPost\", \"ContentFileName\" : \"MyFile.pdf\", \"ContentDescription\" : \"A note for Q1 2011\",\"ParentId\" : \""+parentID+"\"  }");
+		
+		/*
+		 * 
+		 * SELECT Body,CommentCount,ContentData,ContentDescription,ContentFileName,ContentSize,ContentType,CreatedById,CreatedDate,Id,InsertedById,IsDeleted,LastModifiedDate,LikeCount,LinkUrl,ParentId,RelatedRecordId,SystemModstamp,Title,Type FROM FeedItem
+		 */
+		sources.add(json);
+		// needs better closing
+		try (InputStream is=new FileInputStream("c:\\users\\michael\\desktop\\api_rest.pdf"))  {
+			DataSourceWithFileName data=new InputStreamDataSource(is, "ContentData", "happy.pdf");
+			sources.add(data);
+			String requestURL="https://na17.salesforce.com/services/data/v31.0/sobjects/FeedItem";
+			System.out.println(u.upload(sources, requestURL, session).getString());
+		}
+	}
+	
+	public static void addToFolder(String folderID,String session) throws Exception {
+		MultipartFileUploader u=new MultipartFileUploader();
+		folderID="00lo0000000bo4MAAQ";
+		session="00Do0000000KLYP!AR8AQMkQrsij5wAUm8pRXKy5xAeCILUW6othxI17TqOASN7JwnCRZExmNWZe.VHK_JOPEt.pworgr.ZeEDhYpNGzlPWx3G0R";
 		List<DataSourceWithFileName> sources=new ArrayList<DataSourceWithFileName>();
 		DataSourceWithFileName json=
 				new StringDataSource("{ \"Description\" : \"Marketing brochure for Q1 2011\",\"Keywords\" : \"marketing,sales,update\",\"FolderId\" : \""+folderID+"\",\"Name\" : \"Marketing Brochure Q1\",\"Type\" : \"pdf\" }");
 		sources.add(json);
 		// needs better closing
-		InputStream is=new FileInputStream("c:\\users\\michael\\desktop\\api_rest.pdf");
-		DataSourceWithFileName data=new InputStreamDataSource(is, "Body", "happy.pdf");
-		sources.add(data);
-		String requestURL="https://na17.salesforce.com/services/data/v31.0/sobjects/Document";
-		u.upload(sources, requestURL, session);
-		is.close();
+		try (InputStream is=new FileInputStream("c:\\users\\michael\\desktop\\api_rest.pdf"))  {
+			DataSourceWithFileName data=new InputStreamDataSource(is, "Body", "happy.pdf");
+			sources.add(data);
+			String requestURL="https://na17.salesforce.com/services/data/v31.0/sobjects/Document";
+			System.out.println(u.upload(sources, requestURL, session).getString());
+		}
+	}
+	
+	public static void main(String[] args) throws Exception {
+	 addToChatter(null,null);
 }	
 }	
