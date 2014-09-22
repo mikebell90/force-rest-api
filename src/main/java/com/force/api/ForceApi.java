@@ -1,5 +1,8 @@
 package com.force.api;
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.MetricRegistry;
 import com.force.api.exceptions.ApiException;
 import com.force.api.exceptions.AuthenticationFailedException;
 import com.force.api.exceptions.RefreshFailedApiException;
@@ -58,30 +61,44 @@ public class ForceApi {
 	}
 
 	public static ObjectMapper getMapper() { return jsonMapper; }
+	
+	final private Counter counter;
+	final private Meter meter;
 	final private ApiConfig config;
 	private ApiSession session;
 	private boolean autoRenew = false;
 	private TokenRenewalObserver observer=null; 
 	private boolean gzip=false;
-	public ForceApi(ApiConfig config, ApiSession session) {
+	public ForceApi(ApiConfig config, ApiSession session,MetricRegistry registry) {
 		this.config = config;
 		this.setSession(session);
 		if(session.getRefreshToken()!=null) {
 			autoRenew = true;
 		}
-	}
+		if (registry !=null) {
+			this.counter=registry.counter(MetricRegistry.name(ForceApi.class, "api","count"));
+			this.meter=registry.meter(MetricRegistry.name(ForceApi.class, "api","rate"));
+		} else {
+			this.counter=null;
+			this.meter=null;
+		}
+	}	
 
-	public ForceApi(ApiSession session) {
-		this(new ApiConfig(), session);
+	public ForceApi(ApiConfig config, ApiSession session) {
+		this(config,session,null);
+	}	
+	public ForceApi(ApiSession session,MetricRegistry registry) {
+		this(new ApiConfig(), session,registry);
 	}
-
+	
+/*
 	public ForceApi(ApiConfig apiConfig) {
 		config = apiConfig;
 		setSession(Auth.authenticate(apiConfig));
 		autoRenew  = true;
 
 	}
-	
+	*/
 	public void setGzip(boolean gzip) {
 		this.gzip=gzip;
 	}
@@ -243,6 +260,7 @@ public class ForceApi {
         }
     }
 
+	
 	@SuppressWarnings("rawtypes")
 	public QueryResult<Map> query(String query) {
 		return query(query, Map.class);
@@ -353,7 +371,8 @@ public class ForceApi {
 	private final HttpResponse apiRequest(HttpRequest req) {
 		
 		req.setAuthorization("OAuth "+getSession().getAccessToken());
-		req=req.gzip(gzip);              
+		req=req.gzip(gzip);        
+		doMetrics();
 		HttpResponse res = Http.send(req);
 		if(res.getResponseCode()==401) {
 			// Perform one attempt to auto renew session if possible
@@ -372,6 +391,7 @@ public class ForceApi {
 					setSession(Auth.authenticate(config));
 				}
 				req.setAuthorization("OAuth "+getSession().getAccessToken());
+				doMetrics();
 				res = Http.send(req);
 				if (res.getResponseCode()==401) throw new RefreshFailedApiException(401,"Tried to refresh but failed.");
 			} else {
@@ -394,6 +414,11 @@ public class ForceApi {
 		}
 	}
 	
+	private void doMetrics() {
+		if (this.counter !=null) this.counter.inc();
+		if (this.meter != null) this.meter.mark();
+		
+	}
 	/**
 	 * Normalizes the JSON response in case it contains responses from
 	 * Relationsip queries. For e.g.
