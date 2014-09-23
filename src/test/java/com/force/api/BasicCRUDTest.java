@@ -19,11 +19,11 @@ public class BasicCRUDTest {
 	@Test
 	public void basicCRUDTest() {
 
-		ForceApi api = new ForceApi(new ApiConfig()
+		ForceApi api =new ForceApi(new ApiConfig()
 			.setUsername(Fixture.get("username"))
 			.setPassword(Fixture.get("password"))
 			.setClientId(Fixture.get("clientId"))
-			.setClientSecret(Fixture.get("clientSecret")));
+			.setClientSecret(Fixture.get("clientSecret")),null,null);
 
 		if(api.query("SELECT name FROM Account WHERE name LIKE '"+TEST_NAME+"%'",Account.class).getTotalSize()>0) {
 			fail("Looks like org is not clean. Manually delete account record with name '"+TEST_NAME+"' before running this test");

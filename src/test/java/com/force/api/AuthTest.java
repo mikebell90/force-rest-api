@@ -11,9 +11,10 @@ public class AuthTest {
 	@Test
 	public void testSoapLogin() {
 		ForceApi api = new ForceApi(new ApiConfig()
-			.setUsername(Fixture.get("username"))
-			.setPassword(Fixture.get("password")));
-
+		.setUsername(Fixture.get("username"))
+		.setPassword(Fixture.get("password"))
+		.setClientId(Fixture.get("clientId"))
+		.setClientSecret(Fixture.get("clientSecret")),null,null);
 		assertNotNull(api.getSession());
 		assertNotNull(api.getSession().getAccessToken());
 		assertNotNull(api.getSession().getApiEndpoint());
@@ -59,7 +60,7 @@ public class AuthTest {
 			.setUsername(Fixture.get("username"))
 			.setPassword(Fixture.get("password"))
 			.setClientId(Fixture.get("clientId"))
-			.setClientSecret(Fixture.get("clientSecret")));
+			.setClientSecret(Fixture.get("clientSecret")),null,null);
 
 		assertNotNull(api.getSession());
 		assertNotNull(api.getSession().getAccessToken());
@@ -73,7 +74,7 @@ public class AuthTest {
 			.setUsername(Fixture.get("username"))
 			.setPassword(Fixture.get("password"));
 
-		ForceApi api = new ForceApi(c);
+		ForceApi api = new ForceApi(c,null,null);
 
 		ApiSession session = new ApiSession()
 			.setAccessToken(api.getSession().getAccessToken())
