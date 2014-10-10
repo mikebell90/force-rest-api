@@ -74,7 +74,7 @@ public class MultipartFileUploader {
 			System.out.println(u.upload(sources, requestURL, session).getString());
 		}
 	}
-	
+	// adds a file alone
 	public static void addToFile(String title,String filename,String userID,String session) throws Exception {
 		MultipartFileUploader u=new MultipartFileUploader();
 		
@@ -92,8 +92,81 @@ public class MultipartFileUploader {
 			System.out.println(u.upload(sources, MessageFormat.format(requestURL, userID), session).getString());
 		}
 	}
-	
-	
+// Adds a file + text	
+	public static void addToChatterComment(String text,String title,String filename,String feedItemId,String session) throws Exception {
+		MultipartFileUploader u=new MultipartFileUploader();
+		
+		session="00Do0000000aTGT!AQwAQE0SUSwsmJTewEsy12HnX1LtdymLwe5U9DfwBH90rl7o5qmT43gN4tJpdgyj9zcKcalrBSmcnwEQ_yj7P76uxplLfKjD";
+		List<DataSourceWithFileName> sources=new ArrayList<DataSourceWithFileName>();
+		DataSourceWithFileName json=
+				new StringDataSource("{ \"body\" : { \"messageSegments\" : [ { \"type\" : \"Text\", \"text\" : \""+text+"\" }]}, \"capabilities\" : { \"content\" : { \"title\" : \""+title+"\" } }}");
+		
+		/*
+		 * {
+   "body":{
+      "messageSegments":[
+         {
+            "type":"Text",
+            "text":"Here's another receipt."
+         }
+      ]
+   },
+   "capabilities":{
+      "content":{
+         "title":"receipt2"
+      }
+   }
+}
+		 */
+		sources.add(json);
+		// needs better closing
+		try (InputStream is=new FileInputStream("c:\\users\\michael\\desktop\\test.ods"))  {
+			DataSourceWithFileName data=new InputStreamDataSource(is, "feedElementFileUpload",filename);
+			sources.add(data);
+			String requestURL="https://na17.salesforce.com/services/data/v32.0/chatter/feed-elements/{0}/capabilities/comments/items";
+			
+			System.out.println(u.upload(sources, MessageFormat.format(requestURL, feedItemId), session).getString());
+		}
+	}
+
+	public static void addToChatterFeed(String text,String title,String filename,String feedId,String session) throws Exception {
+		MultipartFileUploader u=new MultipartFileUploader();
+		session="BAD";
+		//session="00Do0000000aTGT!AQwAQE0SUSwsmJTewEsy12HnX1LtdymLwe5U9DfwBH90rl7o5qmT43gN4tJpdgyj9zcKcalrBSmcnwEQ_yj7P76uxplLfKjD";
+		List<DataSourceWithFileName> sources=new ArrayList<DataSourceWithFileName>();
+		DataSourceWithFileName json=
+				new StringDataSource("{ \"body\" : { \"messageSegments\" : [ { \"type\" : \"Text\", \"text\" : \""+text+"\" }]}, \"capabilities\" : { \"content\" : { \"title\" : \""+title+"\" } } , \"feedElementType\" : \"FeedItem\", \"subjectId\": \""+feedId+"\"}");
+		
+		/*
+		 * {
+   "body":{
+      "messageSegments":[
+         {
+            "type":"Text",
+            "text":"Here's another receipt."
+         }
+      ]
+   },
+   "capabilities":{
+      "content":{
+         "title":"receipt2"
+      }
+   },
+   "feedElementType":"FeedItem",
+   "subjectId":"005RR000000DmOb"
+}
+		 */
+		sources.add(json);
+		// needs better closing
+		try (InputStream is=new FileInputStream("c:\\users\\michael\\desktop\\test.ods"))  {
+			DataSourceWithFileName data=new InputStreamDataSource(is, "feedElementFileUpload",filename);
+			sources.add(data);
+			String requestURL="https://na17.salesforce.com/services/data/v32.0/chatter/feed-elements";
+			
+			System.out.println(u.upload(sources, requestURL, session).getString());
+		}
+	}
+
 	public static void addToFolder(String folderID,String session) throws Exception {
 		MultipartFileUploader u=new MultipartFileUploader();
 		folderID="00lo0000000bo4MAAQ";
@@ -112,6 +185,7 @@ public class MultipartFileUploader {
 	}
 	
 	public static void main(String[] args) throws Exception {
-	 addToFile("This is a title of a file", "me", null);
+	 //addToChatterComment("This my comment", "file title", "test1.ods", "0D5o0000007fioVCAQ", null);
+		addToChatterFeed("This my main feed", "file title", "test1.ods", "me", null);	
 }	
 }	
