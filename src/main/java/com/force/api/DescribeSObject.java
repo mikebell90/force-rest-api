@@ -143,8 +143,12 @@ public class DescribeSObject extends DescribeSObjectBasic implements Serializabl
      * @since 170
      */
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class Field {
-        private Integer length;
+    public static class Field implements Serializable {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -7510949278298427440L;
+		private Integer length;
         private String name;
         private String type;
         private String soapType;
@@ -314,8 +318,12 @@ public class DescribeSObject extends DescribeSObjectBasic implements Serializabl
      * @author jjauregui
      */
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class PicklistEntry {
-        private String value;
+    public static class PicklistEntry implements Serializable{
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -4445790614476260251L;
+		private String value;
         private Boolean active;
         private String label;
         private Boolean defaultValue;
@@ -350,8 +358,12 @@ public class DescribeSObject extends DescribeSObjectBasic implements Serializabl
      * @since 170
      */
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class ChildEntity {
-        private String field;
+    public static class ChildEntity implements Serializable {
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 4295381204054635597L;
+		private String field;
         private String childSObject;
         private String relationshipName;
         private Boolean deprecatedAndHidden;

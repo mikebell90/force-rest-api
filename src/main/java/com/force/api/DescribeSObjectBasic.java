@@ -2,15 +2,20 @@ package com.force.api;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
  * @author Ryan Brainard
  */
 @JsonIgnoreProperties(ignoreUnknown=true)
-public class DescribeSObjectBasic {
+public class DescribeSObjectBasic implements Serializable {
 
-    private String name;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -5204178227765824384L;
+	private String name;
     private String label;
     private Boolean custom;
     private String keyPrefix;
