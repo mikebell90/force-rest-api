@@ -27,6 +27,7 @@ package com.force.api;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
@@ -37,9 +38,13 @@ import java.util.*;
  * @since 172
  */
 @JsonIgnoreProperties(ignoreUnknown=true)
-public class DescribeSObject extends DescribeSObjectBasic {
+public class DescribeSObject extends DescribeSObjectBasic implements Serializable {
 
-    private List<Field> fields;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -4608192326356332311L;
+	private List<Field> fields;
     private List<ChildEntity> childRelationships;
 
     /**
