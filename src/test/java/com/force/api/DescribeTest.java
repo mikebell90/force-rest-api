@@ -1,12 +1,7 @@
 package com.force.api;
 
 import org.junit.Test;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-
-import static org.junit.Assert.*;
-
+import com.force.api.*;
 public class DescribeTest {
 
 	static ForceApi api = new ForceApi(new ApiConfig()

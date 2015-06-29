@@ -251,11 +251,43 @@ public class ForceApi {
 		}
 
 	}
-
+	
 	public <T> QueryResult<T> query(String query, Class<T> clazz) {
         try {
             return queryAny(uriBase() + "/query/?q=" + URLEncoder.encode(query, "UTF-8"), clazz);
         } catch (UnsupportedEncodingException e) {
+            throw new SFApiException(e);
+        }
+    }
+
+	public <T> List<T> searchSingleObject(String searchQuery,Class<T> clazz) {
+		  try {
+	            return searchAny(uriBase() + "/search/?q=" + URLEncoder.encode(searchQuery, "UTF-8"), clazz);
+	        } catch (UnsupportedEncodingException e) {
+	            throw new SFApiException(e);
+	        }
+	}
+	
+	private <T> List<T> searchAny(String queryUrl, Class<T> clazz) {
+        try (InputStream is= apiRequest(new HttpRequest(ResponseFormat.STREAM)
+                    .url(queryUrl)
+                    .method("GET")
+                    .header("Accept", "application/json")
+                    .expectsCode(200)).getStream()){
+            JsonNode root = jsonMapper.readTree(is);
+            List<T> records = new ArrayList<T>();
+            Iterator<JsonNode> it = root.getElements();
+            while (it.hasNext()) {
+            	JsonNode node = it.next();
+            	records.add(jsonMapper.readValue(node, clazz));
+            }            
+            
+        	return records;
+        } catch (JsonParseException e) {
+            throw new SFApiException(e);
+        } catch (JsonMappingException e) {
+            throw new SFApiException(e);
+        } catch (IOException e) {
             throw new SFApiException(e);
         }
     }
