@@ -10,6 +10,10 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Identity implements Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4305058977228013338L;
 	String id;
 	boolean assertedUser;
 	String userId;
@@ -31,8 +35,12 @@ public class Identity implements Serializable {
 	long utcOffset;
 	Date lastModifiedDate;
 	
-	public class Status {
+	public class Status implements Serializable {
 		
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 6124856588095815865L;
 		Date createdDate;
 		String body;
 		public Date getCreatedDate() {
