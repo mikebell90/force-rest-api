@@ -1,5 +1,6 @@
 package com.force.api;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
 
@@ -7,7 +8,7 @@ import org.codehaus.jackson.annotate.JsonSetter;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Identity {
+public class Identity implements Serializable {
 	
 	String id;
 	boolean assertedUser;

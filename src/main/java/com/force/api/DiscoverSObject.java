@@ -1,13 +1,18 @@
 package com.force.api;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * @author Ryan Brainard
  */
-public class DiscoverSObject<T> {
+public class DiscoverSObject<T> implements Serializable {
 
-    private DescribeSObjectBasic describeSObjectBasic;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -4415136166834317930L;
+	private DescribeSObjectBasic describeSObjectBasic;
     private List<T> recentItems;
 
     DiscoverSObject(DescribeSObjectBasic describeSObjectBasic, List<T> recentItems) {
