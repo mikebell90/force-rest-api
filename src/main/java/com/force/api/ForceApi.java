@@ -144,6 +144,13 @@ public class ForceApi {
 
 	}
 
+	public ResourceRepresentation getChatterConnectedOrganization() throws SFApiException {
+		return new ResourceRepresentation(apiRequest(new HttpRequest(ResponseFormat.STREAM)
+		.url(uriBase()+"/connect/organization")
+		.method("GET")
+		.header("Accept", "application/json")));
+}
+	
 	public ResourceRepresentation getSObject(String type, String id) throws SFApiException {
 		// Should we return null or throw an exception if the record is not found?
 		// Right now will just throw crazy runtimeexception with no explanation
