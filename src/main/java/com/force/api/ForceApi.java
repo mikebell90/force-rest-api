@@ -413,6 +413,13 @@ public class ForceApi {
 		req=req.gzip(gzip);        
 		doMetrics();
 		HttpResponse res = Http.send(req);
+		if (res.getResponseCode()==403) {
+			String resp = res.getString();
+			if ((resp != null)&& (resp.contains("API_DISABLED"))) {
+				log.debug("Api Disabled for "+ config.getUsername());
+				if (this.observer != null) this.observer.tokenNotRenewedSuccessfully();
+			};
+		}	
 		if(res.getResponseCode()==401) {
 			// Perform one attempt to auto renew session if possible
 			if(autoRenew) {
