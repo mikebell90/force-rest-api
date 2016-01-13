@@ -439,7 +439,16 @@ public class ForceApi {
 				req.setAuthorization("OAuth "+getSession().getAccessToken());
 				doMetrics();
 				res = Http.send(req);
-				if (res.getResponseCode()==401) throw new RefreshFailedApiException(401,"Tried to refresh but failed.");
+				if (res.getResponseCode()==401) {
+					if (this.observer !=null) {
+						try {
+							this.observer.tokenNotRenewedSuccessfully();
+						} catch (Exception e) {
+							log.debug("",e);
+						}
+					}
+					throw new RefreshFailedApiException(401,"Tried to refresh but failed.");
+				}
 			} else {
 				if (this.observer !=null) this.observer.tokenNotRenewedSuccessfully();
 				throw new AuthenticationFailedException(401,"No refresh token, and 401 found");
