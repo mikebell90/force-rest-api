@@ -54,8 +54,8 @@ public class ResourceRepresentation {
 	}
 
 	public List<?> asList() {
-		try {
-			return jsonMapper.readValue(response.getStream(), List.class);
+		try (InputStream is = response.getStream()) {
+			return jsonMapper.readValue(is, List.class);
 		} catch (JsonParseException e) {
 			throw new SFApiException(e);
 		} catch (JsonMappingException e) {
