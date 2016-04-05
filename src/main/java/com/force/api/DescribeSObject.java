@@ -43,7 +43,7 @@ public class DescribeSObject extends DescribeSObjectBasic implements Serializabl
     /**
 	 * 
 	 */
-	private static final long serialVersionUID = -4608192326356332311L;
+	private static final long serialVersionUID = -4608192326356332312L;
 	private List<Field> fields;
     private List<ChildEntity> childRelationships;
 
@@ -148,6 +148,55 @@ public class DescribeSObject extends DescribeSObjectBasic implements Serializabl
 		 * 
 		 */
 		private static final long serialVersionUID = -7510949278298427440L;
+		
+		/*
+		
+		 "aggregatable" : true,
+		    "dependentPicklist" : false,
+		    "deprecatedAndHidden" : false,
+		    "digits" : 0,
+		    "displayLocationInDecimal" : false,
+		    "encrypted" : false,
+		    "externalId" : false,
+		    "extraTypeInfo" : "plaintextarea",
+		    "filterable" : true,
+		    "filteredLookupInfo" : null,
+		    "groupable" : true,
+		    "highScaleNumber" : false,
+		    "htmlFormatted" : false,
+		    "idLookup" : false,
+		    "inlineHelpText" : null,
+		    "label" : "Billing Street",
+		    "length" : 255,
+		    "mask" : null,
+		    "maskType" : null,
+		    "name" : "BillingStreet",
+		    "nameField" : false,
+		    "namePointing" : false,
+		    "nillable" : true,
+		    "permissionable" : true,
+		    "picklistValues" : [ ],
+		    "precision" : 0,
+		    "queryByDistance" : false,
+		    "referenceTargetField" : null,
+		    "referenceTo" : [ ],
+		    "relationshipName" : null,
+		    "relationshipOrder" : null,
+		    "restrictedDelete" : false,
+		    "restrictedPicklist" : false,
+		    "scale" : 0,
+		    "soapType" : "xsd:string",
+		    "sortable" : true,
+		    "type" : "textarea",
+		    "unique" : false,
+		    "updateable" : true,
+		    "writeRequiresMasterRead" : false */
+		private Boolean aggregatable;
+		private Integer digits;
+		private Boolean encrypted;
+		private Integer precision;
+		private Integer scale;
+		private String extraTypeInfo;
 		private Integer length;
         private String name;
         private String type;
@@ -309,6 +358,54 @@ public class DescribeSObject extends DescribeSObjectBasic implements Serializabl
         public Boolean isSortable() {
             return sortable;
         }
+
+		public Boolean getAggregatable() {
+			return aggregatable;
+		}
+
+		public void setAggregatable(Boolean aggregatable) {
+			this.aggregatable = aggregatable;
+		}
+
+		public Integer getDigits() {
+			return digits;
+		}
+
+		public void setDigits(Integer digits) {
+			this.digits = digits;
+		}
+
+		public Boolean getEncrypted() {
+			return encrypted;
+		}
+
+		public void setEncrypted(Boolean encrypted) {
+			this.encrypted = encrypted;
+		}
+
+		public Integer getScale() {
+			return scale;
+		}
+
+		public void setScale(Integer scale) {
+			this.scale = scale;
+		}
+
+		public String getExtraTypeInfo() {
+			return extraTypeInfo;
+		}
+
+		public void setExtraTypeInfo(String extraTypeInfo) {
+			this.extraTypeInfo = extraTypeInfo;
+		}
+
+		public Integer getPrecision() {
+			return precision;
+		}
+
+		public void setPrecision(Integer precision) {
+			this.precision = precision;
+		}
     }
 
     /**
