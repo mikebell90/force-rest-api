@@ -93,8 +93,13 @@ public class Http {
 				}
 					
 				}
-			} else {				
-				log.error("Bad response code: " + code + " on request:\n" + req);
+			} else {
+				if (code==401) {
+					log.debug("Bad response code: " + code + " on request:\n" + req);
+				} else {
+					log.error("Bad response code: " + code + " on request:\n" + req);
+				}
+				
 				is = gzipResponse ? new GZIPInputStream(conn.getErrorStream()): conn.getErrorStream();
 				HttpResponse r = new HttpResponse().setString(
 						new String(readResponse(is), "UTF-8")).setResponseCode(code);
