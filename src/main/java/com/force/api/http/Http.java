@@ -20,8 +20,8 @@ import com.force.api.http.HttpRequest.ResponseFormat;
 
 public class Http {
 	private final static Logger log = LoggerFactory.getLogger(Http.class);
-	private static final int CONN_TIMEOUT = 40000;
-	private static final int READ_TIMEOUT = 40000;
+	private static final int CONN_TIMEOUT = 240000;
+	private static final int READ_TIMEOUT = 240000;
 	static final byte[] readResponse(InputStream stream) throws IOException {
 		BufferedInputStream bin = new BufferedInputStream(stream);
 		ByteArrayOutputStream bout = new ByteArrayOutputStream();
@@ -94,7 +94,7 @@ public class Http {
 					
 				}
 			} else {
-				if (code==401) {
+				if ((code==401)||(code==404)) {
 					log.debug("Bad response code: " + code + " on request:\n" + req);
 				} else {
 					log.error("Bad response code: " + code + " on request:\n" + req);
