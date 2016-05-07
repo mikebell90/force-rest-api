@@ -11,17 +11,17 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.zip.GZIPInputStream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.force.api.DefaultErrorObserver;
+import com.force.api.ErrorObserver;
 import com.force.api.exceptions.SFApiException;
 import com.force.api.http.HttpRequest.ResponseFormat;
 
 
 public class Http {
-	private final static Logger log = LoggerFactory.getLogger(Http.class);
+	public static final Http INSTANCE = new Http();
 	private static final int CONN_TIMEOUT = 240000;
 	private static final int READ_TIMEOUT = 240000;
+	final private ErrorObserver errorObserver;
 	static final byte[] readResponse(InputStream stream) throws IOException {
 		BufferedInputStream bin = new BufferedInputStream(stream);
 		ByteArrayOutputStream bout = new ByteArrayOutputStream();
@@ -33,7 +33,14 @@ public class Http {
 		return bout.toByteArray();
 	}
 	
-	public static final HttpResponse send(HttpRequest req) {
+	public Http() {
+		this(new DefaultErrorObserver());
+	}
+	public Http(ErrorObserver errorObserver) {
+		this.errorObserver = errorObserver;
+	}
+	
+	public HttpResponse send(HttpRequest req) {
 		OutputStream os=null;
 		InputStream is=null;
 		try {
@@ -94,12 +101,9 @@ public class Http {
 					
 				}
 			} else {
-				if ((code==401)||(code==404)) {
-					log.debug("Bad response code: " + code + " on request:\n" + req);
-				} else {
-					log.error("Bad response code: " + code + " on request:\n" + req);
+				if (this.errorObserver != null) {
+					this.errorObserver.error(code, req, null);
 				}
-				
 				is = gzipResponse ? new GZIPInputStream(conn.getErrorStream()): conn.getErrorStream();
 				HttpResponse r = new HttpResponse().setString(
 						new String(readResponse(is), "UTF-8")).setResponseCode(code);

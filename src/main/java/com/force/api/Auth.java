@@ -28,7 +28,7 @@ public class Auth {
 		if(c.getClientSecret()==null) throw new IllegalStateException("clientSecret cannot be null");
 		if(c.getUsername()==null) throw new IllegalStateException("username cannot be null");
 		if(c.getPassword()==null) throw new IllegalStateException("password cannot be null");
-		try (InputStream is=Http.send(HttpRequest.formPost()
+		try (InputStream is=Http.INSTANCE.send(HttpRequest.formPost()
 						.url(c.getLoginEndpoint()+"/services/oauth2/token")
 						.param("grant_type","password")
 						.param("client_id",c.getClientId())
@@ -127,7 +127,7 @@ public class Auth {
 		if(res.apiConfig.getRedirectURI()==null) throw new IllegalStateException("redirectURI cannot be null");
 		if(res.code==null) throw new IllegalStateException("code cannot be null");
 		// TODO: throw a (runtime) exception with detailed info if auth failed
-		try (InputStream is=Http.send(HttpRequest.formPost()
+		try (InputStream is=Http.INSTANCE.send(HttpRequest.formPost()
 						.url(res.apiConfig.getLoginEndpoint()+"/services/oauth2/token")
 						.header("Accept","application/json")
 						.param("grant_type","authorization_code")
@@ -157,7 +157,7 @@ public class Auth {
 		if(config.getClientId()==null) throw new IllegalStateException("clientId cannot be null");
 		if(config.getClientSecret()==null) throw new IllegalStateException("clientSecret cannot be null");
 		// TODO: throw a (runtime) exception with detailed info if auth failed
-		try (InputStream is=Http.send(HttpRequest.formPost()
+		try (InputStream is=Http.INSTANCE.send(HttpRequest.formPost()
 						.url(config.getLoginEndpoint()+"/services/oauth2/token")
 						.header("Accept","application/json")
 						.param("grant_type","refresh_token")
@@ -188,7 +188,7 @@ public class Auth {
 	 */
 	static public void revokeToken(ApiConfig config, String token) {
 		
-		try (InputStream is=Http.send(HttpRequest.formPost()
+		try (InputStream is=Http.INSTANCE.send(HttpRequest.formPost()
 				.header("Accept","*/*")
 				.url(config.getLoginEndpoint()+"/services/oauth2/revoke")
 				.param("token", token)).getStream()) {

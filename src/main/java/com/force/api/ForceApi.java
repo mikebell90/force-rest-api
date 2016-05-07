@@ -68,6 +68,7 @@ public class ForceApi {
 	private ApiSession session;
 	private boolean autoRenew = false;
 	private TokenRenewalObserver observer=null; 
+	private ErrorObserver errorObserver = new DefaultErrorObserver();
 	private boolean gzip=false;
 	public ForceApi(ApiConfig config, ApiSession session,MetricRegistry registry) {
 		this.config = config;
@@ -114,7 +115,7 @@ public class ForceApi {
 			@SuppressWarnings("unchecked")
 			Map<String,Object> resp = jsonMapper.readValue(
 					is,Map.class);
-			log.debug("ID="+((String) resp.get("identity")));
+			//log.debug("ID="+((String) resp.get("identity")));
 			return getIdentity((String) resp.get("identity"));
 		} catch (JsonParseException e) {
 			throw new SFApiException(e);
@@ -408,11 +409,11 @@ public class ForceApi {
 	}
 	
 	private final HttpResponse apiRequest(HttpRequest req) {
-		
+		Http http = new Http(this.errorObserver);
 		req.setAuthorization("OAuth "+getSession().getAccessToken());
 		req=req.gzip(gzip);        
 		doMetrics();
-		HttpResponse res = Http.send(req);
+		HttpResponse res = http.send(req);
 		if (res.getResponseCode()==403) {
 			String resp = res.getString();
 			if ((resp != null)&& (resp.contains("API_DISABLED"))) {
@@ -438,13 +439,13 @@ public class ForceApi {
 				}
 				req.setAuthorization("OAuth "+getSession().getAccessToken());
 				doMetrics();
-				res = Http.send(req);
+				res = http.send(req);
 				if (res.getResponseCode()==401) {
 					if (this.observer !=null) {
 						try {
 							this.observer.tokenNotRenewedSuccessfully();
 						} catch (Exception e) {
-							log.debug("",e);
+							log.debug("Exception during obserer non renewal",e);
 						}
 					}
 					throw new RefreshFailedApiException(401,"Tried to refresh but failed.");
@@ -579,5 +580,13 @@ public class ForceApi {
 
 	public void setTokenRenewalObserver(TokenRenewalObserver observer) {
 		this.observer = observer;
+	}
+
+	public ErrorObserver getErrorObserver() {
+		return errorObserver;
+	}
+
+	public void setErrorObserver(ErrorObserver errorObserver) {
+		this.errorObserver = errorObserver;
 	}
 }
