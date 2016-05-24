@@ -13,7 +13,7 @@ public class Identity implements Serializable {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 4305058977228013338L;
+	private static final long serialVersionUID = 4305058977228013339L;
 	String id;
 	boolean assertedUser;
 	String userId;
@@ -34,6 +34,7 @@ public class Identity implements Serializable {
 	String locale;
 	long utcOffset;
 	Date lastModifiedDate;
+	String timezone;
 	
 	public class Status implements Serializable {
 		
@@ -244,6 +245,14 @@ public class Identity implements Serializable {
 	@JsonSetter(value="mobile_phone")
 	public void setMobilePhone(String mobilePhone) {
 		this.mobilePhone = mobilePhone;
+	}
+
+	public String getTimezone() {
+		return timezone;
+	}
+
+	public void setTimezone(String timezone) {
+		this.timezone = timezone;
 	}
 
 	
