@@ -109,7 +109,7 @@ public class ForceApi {
 				apiRequest(new HttpRequest(ResponseFormat.STREAM)
 				.url(uriBase())
 				.method("GET")
-				.header("Accept", "application/json")
+				.header("Accept", "application/json"),true
 				)
 				.getStream()) {
 			@SuppressWarnings("unchecked")
@@ -131,7 +131,7 @@ public class ForceApi {
 				apiRequest(new HttpRequest(ResponseFormat.STREAM)
 				.url(identityURL)
 				.method("GET")
-				.header("Accept", "application/json")
+				.header("Accept", "application/json"),true
 			).getStream() )  {
 			return jsonMapper.readValue(
 					is, Identity.class);
@@ -407,21 +407,26 @@ public class ForceApi {
 	private final String uriBase() {
 		return(getSession().getApiEndpoint()+"/services/data/"+config.getApiVersion());
 	}
-	
 	private final HttpResponse apiRequest(HttpRequest req) {
+		return apiRequest(req, false);
+	}
+	private final HttpResponse apiRequest(HttpRequest req, boolean treat403As401) {
 		Http http = new Http(this.errorObserver);
 		req.setAuthorization("OAuth "+getSession().getAccessToken());
 		req=req.gzip(gzip);        
 		doMetrics();
 		HttpResponse res = http.send(req);
+		
 		if (res.getResponseCode()==403) {
 			String resp = res.getString();
+			log.debug("403 response " + resp);
 			if ((resp != null)&& (resp.contains("API_DISABLED"))) {
 				log.debug("Api Disabled for "+ config.getUsername());
 				if (this.observer != null) this.observer.tokenNotRenewedSuccessfully();
+				treat403As401 = false;
 			};
 		}	
-		if(res.getResponseCode()==401) {
+		if((res.getResponseCode()==401)||((res.getResponseCode()==403)&&(treat403As401))) {
 			// Perform one attempt to auto renew session if possible
 			if(autoRenew) {
 				log.debug("Session expired. Refreshing session...");
