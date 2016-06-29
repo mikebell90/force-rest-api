@@ -456,6 +456,7 @@ public class ForceApi {
 					throw new RefreshFailedApiException(401,"Tried to refresh but failed.");
 				}
 			} else {
+				log.error("NO REFRESH TOKEN - Can't RENEW!", new IOException("No RefreshToken"));
 				if (this.observer !=null) this.observer.tokenNotRenewedSuccessfully();
 				throw new AuthenticationFailedException(401,"No refresh token, and 401 found");
 			}

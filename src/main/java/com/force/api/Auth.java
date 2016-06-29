@@ -13,14 +13,18 @@ import java.util.Map;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.force.api.exceptions.AuthenticationFailedException;
 import com.force.api.exceptions.SFApiException;
 import com.force.api.http.Http;
 import com.force.api.http.HttpRequest;
+import com.force.api.http.HttpRequest.ResponseFormat;
 
 public class Auth {
 
+	private static final Logger log = LoggerFactory.getLogger(Auth.class);
 	private static final ObjectMapper jsonMapper = new ObjectMapper();
 
 	static public final ApiSession oauthLoginPasswordFlow(ApiConfig c) {
@@ -157,16 +161,19 @@ public class Auth {
 		if(config.getClientId()==null) throw new IllegalStateException("clientId cannot be null");
 		if(config.getClientSecret()==null) throw new IllegalStateException("clientSecret cannot be null");
 		// TODO: throw a (runtime) exception with detailed info if auth failed
-		try (InputStream is=Http.INSTANCE.send(HttpRequest.formPost()
-						.url(config.getLoginEndpoint()+"/services/oauth2/token")
-						.header("Accept","application/json")
-						.param("grant_type","refresh_token")
-						.param("client_id",config.getClientId())
-						.param("client_secret", config.getClientSecret())
-						.param("refresh_token", refreshToken)
-					).getStream()){
+		String is = null;
+		try {
+			is=Http.INSTANCE.send(HttpRequest.formPost()
+					.url(config.getLoginEndpoint()+"/services/oauth2/token")
+					.header("Accept","application/json")
+					.param("grant_type","refresh_token")
+					.param("client_id",config.getClientId())
+					.param("client_secret", config.getClientSecret())
+					.param("refresh_token", refreshToken)
+					.responseFormat(ResponseFormat.STRING)
+				).getString();
 			Map<?,?> resp = jsonMapper.readValue(is,Map.class);
-
+			log.debug("SFDCREFRESH Returned string : " + is);
 			return new ApiSession()
 					.setAccessToken((String)resp.get("access_token"))
 					.setApiEndpoint((String)resp.get("instance_url"))
@@ -177,6 +184,7 @@ public class Auth {
 		} catch (JsonMappingException e) {
 			throw new SFApiException(e);
 		} catch (IOException e) {
+			log.debug("SFDCREFRESH EOF The String returned was "  + is);
 			throw new SFApiException(e);
 		}
 	}
