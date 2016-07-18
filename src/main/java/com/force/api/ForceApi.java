@@ -72,7 +72,7 @@ public class ForceApi {
 	private boolean gzip=false;
 	public ForceApi(ApiConfig config, ApiSession session,MetricRegistry registry) {
 		this.config = config;
-		this.setSession(session);
+		setSession(session);
 		if(session.getRefreshToken()!=null) {
 			autoRenew = true;
 		}
@@ -413,6 +413,7 @@ public class ForceApi {
 	private final HttpResponse apiRequest(HttpRequest req, boolean treat403As401) {
 		Http http = new Http(this.errorObserver);
 		req.setAuthorization("OAuth "+getSession().getAccessToken());
+		
 		req=req.gzip(gzip);        
 		doMetrics();
 		HttpResponse res = http.send(req);
@@ -572,27 +573,33 @@ public class ForceApi {
 		return this.config;
 	}
 
-	public ApiSession getSession() {
+	public synchronized ApiSession getSession() {
+		if ((session == null)||(session.getAccessToken()==null)) {
+			log.warn("Abnormal state - Session null or access token null");
+		}
 		return session;
 	}
 
-	public void setSession(ApiSession session) {
+	public synchronized void setSession(ApiSession session) {
+		if ((session == null)||(session.getAccessToken()==null)) {
+			log.warn("Abnormal state - Session null or access token null");
+		}
 		this.session = session;
 	}
 
-	public TokenRenewalObserver getTokenRenewalObserver() {
+	public synchronized TokenRenewalObserver getTokenRenewalObserver() {
 		return this.observer;
 	}
 
-	public void setTokenRenewalObserver(TokenRenewalObserver observer) {
+	public synchronized void setTokenRenewalObserver(TokenRenewalObserver observer) {
 		this.observer = observer;
 	}
 
-	public ErrorObserver getErrorObserver() {
+	public synchronized ErrorObserver getErrorObserver() {
 		return errorObserver;
 	}
 
-	public void setErrorObserver(ErrorObserver errorObserver) {
+	public synchronized void setErrorObserver(ErrorObserver errorObserver) {
 		this.errorObserver = errorObserver;
 	}
 }

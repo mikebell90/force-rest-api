@@ -34,10 +34,9 @@ public class QueryTest {
 		ApiConfig apiConfig=new ApiConfig();
 		apiConfig.setClientId("3MVG9xOCXq4ID1uFGlCxL2VW44a9cWJ_fhJkx5LYhgELjoJIPj8Y2DtR84HWjDqT_VgyKindulM0omfNsb0uh");
 		apiConfig.setClientSecret("4568233188388764112");
-		ApiSession session=new ApiSession();
-		session.setAccessToken("00Do0000000KLYP!AR8AQMbxPzbdUZ_cALmTvI6g_RwCCqvOdvI_W6u4uPU8pzQcw46UKIvz.IpjxGHtlc0WXB.cNR_OiMrrBCaRGCToyPlSx8Uj");
-		session.setRefreshToken("5Aep861LNDQReieQSJ7bcacAdN6djdGOwrGO1FCbAOKeTG2kJvJb0IP_hFx7qwJF.FYjqKIwX6uknKdgVc4RYdS");
-		session.setApiEndpoint("https://na17.salesforce.com");
+		ApiSession session=new ApiSession("00Do0000000KLYP!AR8AQMbxPzbdUZ_cALmTvI6g_RwCCqvOdvI_W6u4uPU8pzQcw46UKIvz.IpjxGHtlc0WXB.cNR_OiMrrBCaRGCToyPlSx8Uj",
+				"5Aep861LNDQReieQSJ7bcacAdN6djdGOwrGO1FCbAOKeTG2kJvJb0IP_hFx7qwJF.FYjqKIwX6uknKdgVc4RYdS",
+		"https://na17.salesforce.com");
 		
 		
 		api = new ForceApi(apiConfig,session);

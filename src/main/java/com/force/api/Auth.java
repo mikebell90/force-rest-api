@@ -42,7 +42,7 @@ public class Auth {
 					).getStream()){
 			@SuppressWarnings("unchecked")
 			Map<String,Object> resp = jsonMapper.readValue(is,Map.class);
-			return new ApiSession((String)resp.get("access_token"),(String)resp.get("instance_url"));
+			return new ApiSession((String)resp.get("access_token"),null,(String)resp.get("instance_url"));
 			
 		} catch (JsonParseException e) {
 			throw new SFApiException(e);
@@ -96,7 +96,7 @@ public class Auth {
 			//System.out.println("userId: "+userId);
 			//System.out.println("organizationId: "+organizationId);
 							
-			return new ApiSession(accessToken, apiEndpoint);
+			return new ApiSession(accessToken,null, apiEndpoint);
 			
 			} catch (MalformedURLException e) {
 				throw new SFApiException(e);
@@ -143,11 +143,7 @@ public class Auth {
 			Map<?,?> resp = jsonMapper.readValue(
 					is,Map.class);
 
-			return new ApiSession()
-					.setRefreshToken((String)resp.get("refresh_token"))
-					.setAccessToken((String)resp.get("access_token"))
-					.setApiEndpoint((String)resp.get("instance_url"));
-			
+			return new ApiSession((String)resp.get("access_token"),(String)resp.get("access_token"),(String)resp.get("instance_url"));
 		} catch (JsonParseException e) {
 			throw new SFApiException(e);
 		} catch (JsonMappingException e) {
@@ -174,11 +170,9 @@ public class Auth {
 				).getString();
 			Map<?,?> resp = jsonMapper.readValue(is,Map.class);
 			log.debug("SFDCREFRESH Returned string : " + is);
-			return new ApiSession()
-					.setAccessToken((String)resp.get("access_token"))
-					.setApiEndpoint((String)resp.get("instance_url"))
-					.setRefreshToken(refreshToken);
-			
+			String accessToken = (String)resp.get("access_token");
+			String instanceUrl = (String)resp.get("instance_url");
+			return new ApiSession(accessToken,refreshToken,instanceUrl);
 		} catch (JsonParseException e) {
 			throw new SFApiException(e);
 		} catch (JsonMappingException e) {

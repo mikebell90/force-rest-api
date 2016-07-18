@@ -76,9 +76,7 @@ public class AuthTest {
 
 		ForceApi api = new ForceApi(c,null,null);
 
-		ApiSession session = new ApiSession()
-			.setAccessToken(api.getSession().getAccessToken())
-			.setApiEndpoint(api.getSession().getApiEndpoint());
+		ApiSession session = new ApiSession(api.getSession().getAccessToken(),null,api.getSession().getApiEndpoint());
 		
 		ForceApi api2 = new ForceApi(c,session);
 		
