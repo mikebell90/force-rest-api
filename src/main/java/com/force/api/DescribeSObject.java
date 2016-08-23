@@ -230,6 +230,7 @@ public class DescribeSObject extends DescribeSObjectBasic implements Serializabl
         private Boolean dependentPicklist;
         private Boolean writeRequiresMasterRead;
         private Boolean sortable;
+        private String controllerName;
 
         public Integer getLength() {
             return length;
@@ -405,6 +406,14 @@ public class DescribeSObject extends DescribeSObjectBasic implements Serializabl
 
 		public void setPrecision(Integer precision) {
 			this.precision = precision;
+		}
+
+		public String getControllerName() {
+			return controllerName;
+		}
+
+		public void setControllerName(String controllerName) {
+			this.controllerName = controllerName;
 		}
     }
 
