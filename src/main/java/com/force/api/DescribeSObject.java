@@ -43,10 +43,22 @@ public class DescribeSObject extends DescribeSObjectBasic implements Serializabl
     /**
 	 * 
 	 */
-	private static final long serialVersionUID = -4608192326356332312L;
+	private static final long serialVersionUID = -4608192226356332312L;
 	private List<Field> fields;
     private List<ChildEntity> childRelationships;
-
+    /*
+     * recordTypeInfos" : [ {
+    "available" : true,
+    "defaultRecordTypeMapping" : true,
+    "master" : true,
+    "name" : "Master",
+    "recordTypeId" : "012000000000000AAA",
+    "urls" : {
+      "layout" : "/services/data/v37.0/sobjects/Opportunity/describe/layouts/012000000000000AAA"
+    }
+  } ],
+     */
+    private List<RecordTypeInfo> recordTypeInfos;
     /**
      * All fields for the sobject.
      * @return
@@ -495,4 +507,12 @@ public class DescribeSObject extends DescribeSObjectBasic implements Serializabl
             return cascadeDelete;
         }
     }
+
+	public List<RecordTypeInfo> getRecordTypeInfos() {
+		return recordTypeInfos;
+	}
+
+	public void setRecordTypeInfos(List<RecordTypeInfo> recordTypeInfos) {
+		this.recordTypeInfos = recordTypeInfos;
+	}
 }
